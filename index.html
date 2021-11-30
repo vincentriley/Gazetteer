@@ -26,16 +26,17 @@
 	</head>
 	<body>
 		<nav class="navbar">
-			<select name="countries" id="countries-dropdown"></select
-			>>
+			<select name="countries" id="countries-dropdown" onchange="countrySelection"></select>
 		</nav>
 		<div id="map"></div>
+		
+
 		<script
 			type="application/javascript"
 			src="libs/js/jquery-2.2.3.min.js"
 		></script>
 		<script type="application/javascript" src="libs/js/script.js"></script>
-		<script src="main.js" type="module"></script>
+
 		<script
 			src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
 			integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB"
@@ -46,6 +47,6 @@
 			integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
 			crossorigin="anonymous"
 		></script>
-		
+		<script src="main.js" type="module"></script>
 	</body>
 </html>
