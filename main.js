@@ -43,6 +43,6 @@ var data = L.geoJSON(data, {
 	})
 	.addTo(map);
 
-const countrySelection() => {
+const countrySelection = () => {
 	console.log("test")
 }
