@@ -65,11 +65,37 @@ const countrySelection = () => {
 				
 			}
 		},
-		error: function (jqXHR, textStatus, errorThrown) {
+		error:  (jqXHR, textStatus, errorThrown) => {
 			// your error code
 			console.log(textStatus);
 		},
 	});
+
+	$.ajax({
+		url: "libs/php/countryInfo.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			country: $("#countries-dropdown").val()
+		},
+		success: (result) => {
+			
+			if (result.status.name == "ok") {
+				console.log(result["data"][0])
+				$("#exampleModalLabel").html(result["data"][0]["countryName"]);
+				$("#capital").html(`Capital: ${result["data"][0]["capital"]}`);
+				$("#population").html(`Population: ${result["data"][0]["population"]}`);
+			}
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log("failure")
+		}
+	})
 };
 
+
 $("#countries-dropdown").on("change", countrySelection);
+
+$("#countries-dropdown").change(() => {
+	$("#exampleModal").modal('show');
+})
