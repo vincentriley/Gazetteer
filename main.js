@@ -3,10 +3,9 @@ $.ajax({
 	url: "libs/php/countryNames.php",
 
 	success: (result) => {
-		
 		let dropdown = $("#countries-dropdown");
 		let countryNameArray = [];
-		
+
 		for (let i = 0; i < result.data.length; i++) {
 			countryNameArray.push([result.data[i].name, result.data[i].iso_a2]);
 		}
@@ -17,7 +16,7 @@ $.ajax({
 					`<option value=${countryNameArray[i][1]}>${countryNameArray[i][0]}</option>`
 				)
 			);
-		} 
+		}
 	},
 	error: (jqXHR, textStatus, errorThrown) => {
 		console.log("failure");
@@ -25,7 +24,7 @@ $.ajax({
 });
 
 //Renders map
-var map = L.map("map").setView([51.05, -0.09], 13);
+var map = L.map("map").setView([51.05, -0.09], 2);
 
 var OpenStreetMap_Mapnik = L.tileLayer(
 	"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -54,22 +53,15 @@ const countrySelection = () => {
 			country: $("#countries-dropdown").val(),
 		},
 		success: (result) => {
-			
-
 			if (result.status.name == "ok") {
-				console.log(result.data.geometry)
 				
-				var lat = null;
-				var long = null;
-				if (result.data.geometry.type === "Polygon") {
-					 lat = result.data.geometry.coordinates[0][0][0];
-					 long = result.data.geometry.coordinates[0][0][1];
-				} else {
-					lat = result.data.geometry.coordinates[0][0][0][0]
-					long = result.data.geometry.coordinates[0][0][0][1];
-				}
-
-				console.log(`Lat= ${lat}, Long=${long}`);
+				map.eachLayer(function(layer){
+					if (OpenStreetMap_Mapnik != layer){map.removeLayer(layer)};
+				});
+				var countryPolygonLayer = L.geoJson(result.data)
+				map.fitBounds(countryPolygonLayer.getBounds())
+				countryPolygonLayer.addTo(map)
+				
 				
 			}
 		},
