@@ -1,4 +1,7 @@
-//Populates drop down list with country names
+//GLOBALS
+var hasExactLatLng = false;
+
+//POPULATES DROPDOWN LIST
 $.ajax({
 	url: "libs/php/countryNames.php",
 
@@ -23,7 +26,7 @@ $.ajax({
 	},
 });
 
-//Renders map
+// RENDERS MAP
 var map = L.map("map").setView([51.05, -0.09], 2);
 
 var OpenStreetMap_Mapnik = L.tileLayer(
@@ -44,12 +47,12 @@ var data = L.geoJSON(data, {
 	})
 	.addTo(map);
 
-const countrySelection = () => {
+//API CALLS
+
+const countrySelection = (country, lat = null, long = null) => {
 	$("#flag").attr(
 		"src",
-		"http://www.geonames.org/flags/x/" +
-			$("#countries-dropdown").val().toLowerCase() +
-			".gif"
+		"http://www.geonames.org/flags/x/" + country.toLowerCase() + ".gif"
 	);
 
 	$.ajax({
@@ -57,7 +60,7 @@ const countrySelection = () => {
 		type: "POST",
 		dataType: "json",
 		data: {
-			country: $("#countries-dropdown").val(),
+			country: country.toUpperCase(),
 		},
 		success: (result) => {
 			if (result.status.name == "ok") {
@@ -72,7 +75,6 @@ const countrySelection = () => {
 			}
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
-			// your error code
 			console.log(textStatus);
 		},
 	});
@@ -84,7 +86,7 @@ const countrySelection = () => {
 		type: "POST",
 		dataType: "json",
 		data: {
-			country: $("#countries-dropdown").val(),
+			country: country,
 		},
 		success: (result) => {
 			if (result.status.name == "ok") {
@@ -104,7 +106,7 @@ const countrySelection = () => {
 		type: "POST",
 		dataType: "json",
 		data: {
-			country: $("#countries-dropdown").val(),
+			country: country,
 		},
 		success: (result) => {
 			if (result.status.name == "ok") {
@@ -117,6 +119,29 @@ const countrySelection = () => {
 			console.log(errorThrown);
 		},
 	});
+
+	if (hasExactLatLng) {
+		$.ajax({
+			url: "libs/php/getWeather.php",
+			type: "POST",
+			dataType: "json",
+			data: {
+				lat: lat,
+				long: long,
+			},
+			success: (result) => {
+				console.log(result);
+			},
+			error: (jqXHR, textStatus, errorThrown) => {
+				console.log(errorThrown);
+			},
+		});
+		
+	} else {
+		$("#weather").html(
+			"For up to date weather please click on a spot on the map."
+		);
+	}
 };
 
 map.on("click", (e) => {
@@ -132,8 +157,10 @@ map.on("click", (e) => {
 			long: latlng.lng,
 		},
 		success: (result) => {
-			console.log(result);
-			$("exampleModal").modal("show")
+			hasExactLatLng = true;
+			var country = result.data.countryCode.toLowerCase();
+			countrySelection(country, latlng.lng, latlng.lng);
+			$("#exampleModal").modal("show");
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
 			console.log(textStatus);
@@ -141,7 +168,11 @@ map.on("click", (e) => {
 	});
 });
 
-$("#countries-dropdown").on("change", countrySelection);
+$("#countries-dropdown").on("change", () => {
+	var country = $("#countries-dropdown").val();
+	console.log(country);
+	countrySelection(country);
+});
 
 $("#countries-dropdown").change(() => {
 	$("#exampleModal").modal("show");
