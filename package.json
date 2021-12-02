@@ -1,0 +1,23 @@
+{
+  "name": "project1",
+  "version": "1.0.0",
+  
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vincentriley/Gazzeteer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vincentriley/Gazzeteer/issues"
+  },
+  "homepage": "https://github.com/vincentriley/Gazzeteer#readme",
+  "dependencies": {
+    "dotenv": "^10.0.0"
+  }
+}

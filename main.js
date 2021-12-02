@@ -45,6 +45,13 @@ var data = L.geoJSON(data, {
 	.addTo(map);
 
 const countrySelection = () => {
+	$("#flag").attr(
+		"src",
+		"http://www.geonames.org/flags/x/" +
+			$("#countries-dropdown").val().toLowerCase() +
+			".gif"
+	);
+
 	$.ajax({
 		url: "libs/php/countryBorders.php",
 		type: "POST",
@@ -54,48 +61,88 @@ const countrySelection = () => {
 		},
 		success: (result) => {
 			if (result.status.name == "ok") {
-				
-				map.eachLayer(function(layer){
-					if (OpenStreetMap_Mapnik != layer){map.removeLayer(layer)};
+				map.eachLayer(function (layer) {
+					if (OpenStreetMap_Mapnik != layer) {
+						map.removeLayer(layer);
+					}
 				});
-				var countryPolygonLayer = L.geoJson(result.data)
-				map.fitBounds(countryPolygonLayer.getBounds())
-				countryPolygonLayer.addTo(map)
-				
-				
+				var countryPolygonLayer = L.geoJson(result.data);
+				map.fitBounds(countryPolygonLayer.getBounds());
+				countryPolygonLayer.addTo(map);
 			}
 		},
-		error:  (jqXHR, textStatus, errorThrown) => {
+		error: (jqXHR, textStatus, errorThrown) => {
 			// your error code
 			console.log(textStatus);
 		},
 	});
+
+	var currencyCode = "";
 
 	$.ajax({
 		url: "libs/php/countryInfo.php",
 		type: "POST",
 		dataType: "json",
 		data: {
-			country: $("#countries-dropdown").val()
+			country: $("#countries-dropdown").val(),
 		},
 		success: (result) => {
-			
 			if (result.status.name == "ok") {
-				console.log(result["data"][0])
 				$("#exampleModalLabel").html(result["data"][0]["countryName"]);
 				$("#capital").html(`Capital: ${result["data"][0]["capital"]}`);
 				$("#population").html(`Population: ${result["data"][0]["population"]}`);
+				currencyCode = result["data"][0]["currencyCode"];
 			}
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
-			console.log("failure")
-		}
-	})
+			console.log("failure");
+		},
+	});
+
+	$.ajax({
+		url: "libs/php/currency.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			country: $("#countries-dropdown").val(),
+		},
+		success: (result) => {
+			if (result.status.name == "ok") {
+				$("#currency").html(
+					`Exchange rate to USD: ${result["data"]["rates"][currencyCode]}`
+				);
+			}
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(errorThrown);
+		},
+	});
 };
 
+map.on("click", (e) => {
+	var latlng = map.mouseEventToLatLng(e.originalEvent);
+	console.log(latlng.lat + ", " + latlng.lng);
+
+	$.ajax({
+		url: "libs/php/findCountry.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			lat: latlng.lat,
+			long: latlng.lng,
+		},
+		success: (result) => {
+			console.log(result);
+			$("exampleModal").modal("show")
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(textStatus);
+		},
+	});
+});
 
 $("#countries-dropdown").on("change", countrySelection);
 
 $("#countries-dropdown").change(() => {
-	$("#exampleModal").modal('show');
-})
+	$("#exampleModal").modal("show");
+});
