@@ -28,6 +28,16 @@ $.ajax({
 
 // RENDERS MAP
 var map = L.map("map").setView([51.05, -0.09], 2);
+if (map) {
+	navigator.geolocation.getCurrentPosition((GeolocationPosition) => {
+		var userCoordinates = [
+			GeolocationPosition.coords.latitude,
+			GeolocationPosition.coords.longitude,
+		];
+		console.log(userCoordinates);
+		map.setView(userCoordinates, 15);
+	});
+}
 
 var OpenStreetMap_Mapnik = L.tileLayer(
 	"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -94,29 +104,30 @@ const countrySelection = (country, lat = null, long = null) => {
 				$("#capital").html(`Capital: ${result["data"][0]["capital"]}`);
 				$("#population").html(`Population: ${result["data"][0]["population"]}`);
 				currencyCode = result["data"][0]["currencyCode"];
+				$.ajax({
+					url: "libs/php/currency.php",
+					type: "POST",
+					dataType: "json",
+					data: {
+						country: country,
+					},
+					success: (result) => {
+						if (result.status.name == "ok") {
+							$("#currency").html(
+								`Exchange rate to USD: ${result["data"]["rates"][
+									currencyCode
+								].toFixed(2)} ${currencyCode}`
+							);
+						}
+					},
+					error: (jqXHR, textStatus, errorThrown) => {
+						console.log(errorThrown);
+					},
+				});
 			}
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
 			console.log("failure");
-		},
-	});
-
-	$.ajax({
-		url: "libs/php/currency.php",
-		type: "POST",
-		dataType: "json",
-		data: {
-			country: country,
-		},
-		success: (result) => {
-			if (result.status.name == "ok") {
-				$("#currency").html(
-					`Exchange rate to USD: ${result["data"]["rates"][currencyCode]}`
-				);
-			}
-		},
-		error: (jqXHR, textStatus, errorThrown) => {
-			console.log(errorThrown);
 		},
 	});
 
@@ -130,23 +141,23 @@ const countrySelection = (country, lat = null, long = null) => {
 				long: long,
 			},
 			success: (result) => {
-				console.log(result);
+				$("#weather").html(
+					`Temperature = ${(result.data.main.temp - 273).toFixed(1)}&deg;`
+				);
 			},
 			error: (jqXHR, textStatus, errorThrown) => {
 				console.log(errorThrown);
 			},
 		});
-		
 	} else {
 		$("#weather").html(
-			"For up to date weather please click on a spot on the map."
+			"For weather forecast please click on a spot on the map."
 		);
 	}
 };
 
 map.on("click", (e) => {
 	var latlng = map.mouseEventToLatLng(e.originalEvent);
-	console.log(latlng.lat + ", " + latlng.lng);
 
 	$.ajax({
 		url: "libs/php/findCountry.php",
@@ -159,8 +170,9 @@ map.on("click", (e) => {
 		success: (result) => {
 			hasExactLatLng = true;
 			var country = result.data.countryCode.toLowerCase();
-			countrySelection(country, latlng.lng, latlng.lng);
+			countrySelection(country, latlng.lat, latlng.lng);
 			$("#exampleModal").modal("show");
+			hasExactLatLng = false;
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
 			console.log(textStatus);
@@ -170,7 +182,7 @@ map.on("click", (e) => {
 
 $("#countries-dropdown").on("change", () => {
 	var country = $("#countries-dropdown").val();
-	console.log(country);
+
 	countrySelection(country);
 });
 
