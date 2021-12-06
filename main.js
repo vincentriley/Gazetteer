@@ -1,5 +1,6 @@
 //GLOBALS
 var hasExactLatLng = false;
+var country = null;
 
 //POPULATES DROPDOWN LIST
 $.ajax({
@@ -28,16 +29,41 @@ $.ajax({
 
 // RENDERS MAP
 var map = L.map("map").setView([51.05, -0.09], 2);
-if (map) {
-	navigator.geolocation.getCurrentPosition((GeolocationPosition) => {
-		var userCoordinates = [
-			GeolocationPosition.coords.latitude,
-			GeolocationPosition.coords.longitude,
-		];
-		console.log(userCoordinates);
-		map.setView(userCoordinates, 15);
-	});
-}
+
+const renderMapWithUserLocation = () => {
+	if (map) {
+		navigator.geolocation.getCurrentPosition((GeolocationPosition) => {
+			var userCoordinates = [
+				GeolocationPosition.coords.latitude,
+				GeolocationPosition.coords.longitude,
+			];
+			
+			//finds user country
+			$.ajax({
+				url: "libs/php/findCountry.php",
+				type: "POST",
+				dataType: "json",
+				data: {
+					lat: userCoordinates[0],
+					long: userCoordinates[1],
+				},
+				success: (result) => {
+					if (!country) {
+						country = result.data.countryCode.toLowerCase();
+					} else {
+						return
+					}
+				},
+				error: (jqXHR, textStatus, errorThrown) => {
+					console.log(textStatus);
+				},
+			});
+			map.setView(userCoordinates, 15);
+		});
+	}
+};
+
+renderMapWithUserLocation();
 
 var OpenStreetMap_Mapnik = L.tileLayer(
 	"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -57,14 +83,20 @@ var data = L.geoJSON(data, {
 	})
 	.addTo(map);
 
-//API CALLS
+//RENDERS EASYBUTTONS
 
-const countrySelection = (country, lat = null, long = null) => {
-	$("#flag").attr(
-		"src",
-		"http://www.geonames.org/flags/x/" + country.toLowerCase() + ".gif"
-	);
+L.easyButton("fa-globe", (btn, map) => {
+	$("#exampleModal").modal("show");
+	countrySelection(country);
+}).addTo(map);
 
+L.easyButton("fa-newspaper", (btn, map) => {
+	$("#newsModal").modal("show");
+}).addTo(map);
+
+//GENERAL BUTTON API CALL
+
+const countryBordersOnMap = (country) => {
 	$.ajax({
 		url: "libs/php/countryBorders.php",
 		type: "POST",
@@ -88,6 +120,13 @@ const countrySelection = (country, lat = null, long = null) => {
 			console.log(textStatus);
 		},
 	});
+};
+
+const countrySelection = (country, lat = null, long = null) => {
+	$("#flag").attr(
+		"src",
+		"http://www.geonames.org/flags/x/" + country.toLowerCase() + ".gif"
+	);
 
 	var currencyCode = "";
 
@@ -169,9 +208,14 @@ map.on("click", (e) => {
 		},
 		success: (result) => {
 			hasExactLatLng = true;
-			var country = result.data.countryCode.toLowerCase();
+			country = result.data.countryCode.toLowerCase();
+
+			countryBordersOnMap(country);
+
+			//need to find way of changing value in dropdown list
+
 			countrySelection(country, latlng.lat, latlng.lng);
-			$("#exampleModal").modal("show");
+			//$("#exampleModal").modal("show");
 			hasExactLatLng = false;
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
@@ -181,11 +225,9 @@ map.on("click", (e) => {
 });
 
 $("#countries-dropdown").on("change", () => {
-	var country = $("#countries-dropdown").val();
-
+	country = $("#countries-dropdown").val();
+	countryBordersOnMap(country);
 	countrySelection(country);
 });
 
-$("#countries-dropdown").change(() => {
-	$("#exampleModal").modal("show");
-});
+$("#countries-dropdown").change(() => {});

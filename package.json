@@ -1,7 +1,6 @@
 {
   "name": "project1",
   "version": "1.0.0",
-  
   "description": "",
   "main": "main.js",
   "scripts": {
@@ -18,6 +17,7 @@
   },
   "homepage": "https://github.com/vincentriley/Gazzeteer#readme",
   "dependencies": {
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "leaflet-easybutton": "^2.4.0"
   }
 }
