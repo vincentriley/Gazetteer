@@ -1,11 +1,14 @@
 <?php
 
+//foursquare api key: fsq3d1lcB2G/zNp3WceKBL3TazNdXyjh+Dra1uv/vO2eg4E=
+
+
 	ini_set('display_errors', 'On');
 	error_reporting(E_ALL);
 
 	$executionStartTime = microtime(true);
 
-	$url='https://openexchangerates.org/api/latest.json?app_id=9135efb167d3464e8c9748333c24e852';
+	$url='https://newsdata.io/api/1/news?country=' . $_REQUEST['country'] . '&apikey=pub_26015626879a43cc57b77868d3e2c18b6828';
 
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

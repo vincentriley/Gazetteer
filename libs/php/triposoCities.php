@@ -1,11 +1,14 @@
+
+
 <?php
+
 
 	ini_set('display_errors', 'On');
 	error_reporting(E_ALL);
 
 	$executionStartTime = microtime(true);
 
-	$url='https://openexchangerates.org/api/latest.json?app_id=9135efb167d3464e8c9748333c24e852';
+	$url='https://www.triposo.com/api/20211011/location.json?countrycode=' . $_REQUEST['country'] . '&tag_labels=city&count=10&fields=id,name,score,snippet&order_by=-score&account=73A1QUQ0&token=yvxxa8y2yrtv66bawcwgajp03ouu9r2x';
 
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

@@ -31,12 +31,11 @@
 			</select>
 		</nav>
 
+		<!--Leaflet map-->
+
 		<div id="map"></div>
 
-		<!-- Button trigger modal 
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-	Launch demo modal
-  </button>-->
+		
 
 		<!-- General modal -->
 		<div
@@ -92,8 +91,8 @@
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header">
-		
-						<h5 class="modal-title" id="newsModalLabel">News</h5>
+						
+						<h5 class="modal-title" id="newsModalLabel">Latest stories</h5>
 						<button
 							type="button"
 							class="btn-close"
@@ -101,8 +100,10 @@
 							aria-label="Close"
 						></button>
 					</div>
-					<div class="top-stories">
-						
+					<div id="newsModalBody" class="modal-body">
+						<div id="newsStoryContainer" class="container">
+							
+						</div>
 					</div>
 					<div class="modal-footer">
 						<button
@@ -118,6 +119,87 @@
 			</div>
 		</div>
 
+		<!--WEATHER MODAL-->
+
+		<div
+			class="modal"
+			id="weatherModal"
+			tabindex="-1"
+			aria-labelledby="exampleModalLabel"
+			aria-hidden="true"
+		>
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						
+						<h5 class="modal-title" id="newsModalLabel">Latest Weather</h5>
+						<button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="modal"
+							aria-label="Close"
+						></button>
+					</div>
+					<div id="newsModalBody" class="modal-body">
+						<div id="weatherContainer" class="container">
+							
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button
+							type="button"
+							class="btn btn-secondary"
+							data-bs-dismiss="modal"
+						>
+							Close
+						</button>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!--CITIES MODAL-->
+
+		<div
+			class="modal"
+			id="citiesModal"
+			tabindex="-1"
+			aria-labelledby="exampleModalLabel"
+			aria-hidden="true"
+		>
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						
+						<h5 class="modal-title" id="newsModalLabel">Top Cities</h5>
+						<button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="modal"
+							aria-label="Close"
+						></button>
+					</div>
+					<div id="newsModalBody" class="modal-body">
+						<div id="citiesContainer" class="container">
+							
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button
+							type="button"
+							class="btn btn-secondary"
+							data-bs-dismiss="modal"
+						>
+							Close
+						</button>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!--SCRIPTS-->
 		<script
 			src="https://code.jquery.com/jquery-3.6.0.min.js"
 			integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="

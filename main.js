@@ -1,5 +1,6 @@
 //GLOBALS
 var hasExactLatLng = false;
+var latlng;
 var country = null;
 
 //POPULATES DROPDOWN LIST
@@ -37,7 +38,7 @@ const renderMapWithUserLocation = () => {
 				GeolocationPosition.coords.latitude,
 				GeolocationPosition.coords.longitude,
 			];
-			
+
 			//finds user country
 			$.ajax({
 				url: "libs/php/findCountry.php",
@@ -51,7 +52,7 @@ const renderMapWithUserLocation = () => {
 					if (!country) {
 						country = result.data.countryCode.toLowerCase();
 					} else {
-						return
+						return;
 					}
 				},
 				error: (jqXHR, textStatus, errorThrown) => {
@@ -88,13 +89,22 @@ var data = L.geoJSON(data, {
 L.easyButton("fa-globe", (btn, map) => {
 	$("#exampleModal").modal("show");
 	countrySelection(country);
+	console.log(`General info ${country}`);
 }).addTo(map);
 
 L.easyButton("fa-newspaper", (btn, map) => {
 	$("#newsModal").modal("show");
+	$("#newsModalLabel").text("Headlines:");
+	console.log(`News ${country}`);
+	getCountryNews(country);
 }).addTo(map);
 
-//GENERAL BUTTON API CALL
+L.easyButton("fa-city", (btn, map) => {
+	$("#citiesModal").modal("show");
+	getCities(country);
+}).addTo(map);
+
+//DISPLAY COUNTRY BORDERS ON MAP
 
 const countryBordersOnMap = (country) => {
 	$.ajax({
@@ -121,6 +131,8 @@ const countryBordersOnMap = (country) => {
 		},
 	});
 };
+
+//GENERAL BUTTON API CALLS
 
 const countrySelection = (country, lat = null, long = null) => {
 	$("#flag").attr(
@@ -169,34 +181,12 @@ const countrySelection = (country, lat = null, long = null) => {
 			console.log("failure");
 		},
 	});
-
-	if (hasExactLatLng) {
-		$.ajax({
-			url: "libs/php/getWeather.php",
-			type: "POST",
-			dataType: "json",
-			data: {
-				lat: lat,
-				long: long,
-			},
-			success: (result) => {
-				$("#weather").html(
-					`Temperature = ${(result.data.main.temp - 273).toFixed(1)}&deg;`
-				);
-			},
-			error: (jqXHR, textStatus, errorThrown) => {
-				console.log(errorThrown);
-			},
-		});
-	} else {
-		$("#weather").html(
-			"For weather forecast please click on a spot on the map."
-		);
-	}
 };
 
+//FIND COUNTRY BY CLICKING ON POINT ON MAP
+
 map.on("click", (e) => {
-	var latlng = map.mouseEventToLatLng(e.originalEvent);
+	latlng = map.mouseEventToLatLng(e.originalEvent);
 
 	$.ajax({
 		url: "libs/php/findCountry.php",
@@ -222,12 +212,119 @@ map.on("click", (e) => {
 			console.log(textStatus);
 		},
 	});
+
+	$.ajax({
+		url: "libs/php/getWeather.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			lat: latlng.lat,
+			long: latlng.lng,
+		},
+		success: (result) => {
+			console.log(result.data.main);
+			$("#weatherModal").modal("show");
+			$("#weatherContainer").empty();
+			$("#weatherContainer").append(`
+			<p>Temperature = ${(result.data.main.temp - 273).toFixed(1)}&deg;</p>
+			`);
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(errorThrown);
+		},
+	});
+});
+
+//NEWS BUTTON API CALL
+
+const getCountryNews = (country) => {
+	$.ajax({
+		url: "libs/php/countryNews.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			country: country,
+		},
+		success: (result) => {
+			console.log(result);
+			if (result.data.totalResults === 0) {
+				$("#newsStoryContainer").empty();
+				$("#newsStoryContainer").append(
+					"<p>Sorry no news available for this country."
+				);
+			} else {
+				var stories = result.data.results;
+				console.log(stories);
+				stories.forEach((story) => {
+					if (story.image_url) {
+						$("#newsStoryContainer").empty();
+						$("#newsStoryContainer").append(`
+				<div class="newsStoryRow" class="row">
+					<div class="col-2"><img class="newsImage"  src="${story.image_url}"></img></div>
+					<div class="col-10"><a href="${story.link}"<p>${story.title}</p></a></div>
+				</div>
+				`);
+					} else {
+						$("newsStoryContainer").empty();
+						$("#newsStoryContainer").append(`
+				<div class="row">
+					
+					<div class="col-12"><a href="${story.link}"<p>${story.title}</p></a></div>
+				</div>
+				`);
+					}
+				});
+			}
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(textStatus);
+		},
+	});
+};
+
+//GET CITIES API CALL
+
+const getCities = (country) => {
+	if (country === "gb") {
+		country = "uk";
+	}
+	$.ajax({
+		url: "libs/php/triposoCities.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			country: country,
+		},
+		success: (result) => {
+			var cities = result.data.results;
+			console.log(cities);
+			$("#citiesContainer").empty();
+			cities.forEach((city) => {
+				$("#citiesContainer").append(`
+				<div class="citiesRow" class="row">
+					<div class="col-8"><h5>${city.name}</h5></div>
+					<div class="col-4">
+						<button value=${city.id} type="button" class="btn btn-primary">Primary</button>
+					</div>
+					
+				</div>
+				`);
+			});
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(textStatus);
+		},
+	});
+};
+
+//CLICK HANDLERS
+$(/*not sure how to get the button class*/).on("change", () => {
+	
 });
 
 $("#countries-dropdown").on("change", () => {
 	country = $("#countries-dropdown").val();
 	countryBordersOnMap(country);
-	countrySelection(country);
 });
 
 $("#countries-dropdown").change(() => {});
