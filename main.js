@@ -3,6 +3,10 @@ var hasExactLatLng = false;
 var latlng;
 var country = null;
 
+const cityClickHandler = () => {
+	console.log("success")
+}
+
 //POPULATES DROPDOWN LIST
 $.ajax({
 	url: "libs/php/countryNames.php",
@@ -222,11 +226,14 @@ map.on("click", (e) => {
 			long: latlng.lng,
 		},
 		success: (result) => {
-			console.log(result.data.main);
+			console.log(result.data);
 			$("#weatherModal").modal("show");
 			$("#weatherContainer").empty();
 			$("#weatherContainer").append(`
-			<p>Temperature = ${(result.data.main.temp - 273).toFixed(1)}&deg;</p>
+			<p>Weather Station Name: ${result.data.name}</p>
+			<p>Temperature: ${(result.data.main.temp - 273).toFixed(1)}&deg;</p>
+			<p>Humidity: ${result.data.main.humidity}%</p>
+			<p>Wind Speed: ${result.data.wind.speed}</p>
 			`);
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
@@ -299,12 +306,13 @@ const getCities = (country) => {
 			var cities = result.data.results;
 			console.log(cities);
 			$("#citiesContainer").empty();
+			
 			cities.forEach((city) => {
 				$("#citiesContainer").append(`
 				<div class="citiesRow" class="row">
 					<div class="col-8"><h5>${city.name}</h5></div>
 					<div class="col-4">
-						<button value=${city.id} type="button" class="btn btn-primary">Primary</button>
+						<button id=${city.id} type="button" class="btn btn-primary city-btn">Top Restaurants</button>
 					</div>
 					
 				</div>
@@ -317,10 +325,42 @@ const getCities = (country) => {
 	});
 };
 
-//CLICK HANDLERS
-$(/*not sure how to get the button class*/).on("change", () => {
-	
-});
+//TOP RESTAURANTS API CALL
+
+$("#citiesContainer").on("click", ".city-btn", (event) => {
+	const cityId = event.target.id
+	console.log(cityId)
+	$.ajax({
+		url: "libs/php/triposoPOI.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			cityId: cityId,
+		},
+		success: (result) => {
+			console.log(result)
+			var restaurants = result.data.results;
+			$("#citiesModal").modal("hide");
+			$("#restaurantsModal").modal("show");
+			$("#restaurantsContainer").empty();
+			
+			restaurants.forEach((restaurant) => {
+				$("#restaurantsContainer").append(`
+				<div class="restaurantsRow" class="row">
+					<div class="col-3"><p>${restaurant.name}</p></div>
+					<div class="col-8"><p>${restaurant.intro}</p></div>
+					
+				</div>
+				`); 
+			})
+			
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(textStatus);
+		},
+	});
+})
+
 
 $("#countries-dropdown").on("change", () => {
 	country = $("#countries-dropdown").val();
