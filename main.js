@@ -2,10 +2,12 @@
 var hasExactLatLng = false;
 var latlng;
 var country = null;
+var weatherSelected = false;
+var weatherAlertHasFired = false;
 
 const cityClickHandler = () => {
-	console.log("success")
-}
+	console.log("success");
+};
 
 //POPULATES DROPDOWN LIST
 $.ajax({
@@ -33,7 +35,7 @@ $.ajax({
 });
 
 // RENDERS MAP
-var map = L.map("map").setView([51.05, -0.09], 2);
+var map = L.map("map", { minZoom: 3 }).setView([51.05, -0.09], 2);
 
 const renderMapWithUserLocation = () => {
 	if (map) {
@@ -91,20 +93,33 @@ var data = L.geoJSON(data, {
 //RENDERS EASYBUTTONS
 
 L.easyButton("fa-globe", (btn, map) => {
+	countryBordersOnMap(country);
 	$("#exampleModal").modal("show");
 	countrySelection(country);
 	console.log(`General info ${country}`);
 }).addTo(map);
 
 L.easyButton("fa-newspaper", (btn, map) => {
+	countryBordersOnMap(country);
 	$("#newsModal").modal("show");
 	$("#newsModalLabel").text("Headlines:");
 	console.log(`News ${country}`);
 	getCountryNews(country);
 }).addTo(map);
 
+L.easyButton("fa-cloud-sun", (btn, map) => {
+	weatherSelected = true;
+	if (!weatherAlertHasFired) {
+		alert(
+			"Please click on a point on the map for most recent weather forecast!"
+		);
+		weatherAlertHasFired = true;
+	}
+}).addTo(map);
+
 L.easyButton("fa-city", (btn, map) => {
-	$("#citiesModal").modal("show");
+	countryBordersOnMap(country);
+	//$("#citiesModal").modal("show");
 	getCities(country);
 }).addTo(map);
 
@@ -155,10 +170,11 @@ const countrySelection = (country, lat = null, long = null) => {
 		},
 		success: (result) => {
 			if (result.status.name == "ok") {
-				$("#exampleModalLabel").html(result["data"][0]["countryName"]);
-				$("#capital").html(`Capital: ${result["data"][0]["capital"]}`);
-				$("#population").html(`Population: ${result["data"][0]["population"]}`);
-				currencyCode = result["data"][0]["currencyCode"];
+				var selectedCountry = result.data[0]
+				$("#exampleModalLabel").html(selectedCountry["countryName"]);
+				$("#capital").html(`Capital: ${selectedCountry["capital"]}`);
+				$("#population").html(`Population: ${selectedCountry["population"]}`);
+				currencyCode = selectedCountry["currencyCode"];
 				$.ajax({
 					url: "libs/php/currency.php",
 					type: "POST",
@@ -207,6 +223,9 @@ map.on("click", (e) => {
 			countryBordersOnMap(country);
 
 			//need to find way of changing value in dropdown list
+			
+			
+		  
 
 			countrySelection(country, latlng.lat, latlng.lng);
 			//$("#exampleModal").modal("show");
@@ -217,29 +236,32 @@ map.on("click", (e) => {
 		},
 	});
 
-	$.ajax({
-		url: "libs/php/getWeather.php",
-		type: "POST",
-		dataType: "json",
-		data: {
-			lat: latlng.lat,
-			long: latlng.lng,
-		},
-		success: (result) => {
-			console.log(result.data);
-			$("#weatherModal").modal("show");
-			$("#weatherContainer").empty();
-			$("#weatherContainer").append(`
+	if (weatherSelected) {
+		$.ajax({
+			url: "libs/php/getWeather.php",
+			type: "POST",
+			dataType: "json",
+			data: {
+				lat: latlng.lat,
+				long: latlng.lng,
+			},
+			success: (result) => {
+				console.log(result.data);
+				$("#weatherModal").modal("show");
+				$("#weatherContainer").empty();
+				$("#weatherContainer").append(`
 			<p>Weather Station Name: ${result.data.name}</p>
 			<p>Temperature: ${(result.data.main.temp - 273).toFixed(1)}&deg;</p>
 			<p>Humidity: ${result.data.main.humidity}%</p>
 			<p>Wind Speed: ${result.data.wind.speed}</p>
 			`);
-		},
-		error: (jqXHR, textStatus, errorThrown) => {
-			console.log(errorThrown);
-		},
-	});
+			},
+			error: (jqXHR, textStatus, errorThrown) => {
+				console.log(errorThrown);
+			},
+		});
+		weatherSelected = false;
+	}
 });
 
 //NEWS BUTTON API CALL
@@ -268,7 +290,7 @@ const getCountryNews = (country) => {
 						$("#newsStoryContainer").append(`
 				<div class="newsStoryRow" class="row">
 					<div class="col-2"><img class="newsImage"  src="${story.image_url}"></img></div>
-					<div class="col-10"><a href="${story.link}"<p>${story.title}</p></a></div>
+					<div class="col-10" text-truncate><a href="${story.link}"<p>${story.title}</p></a></div>
 				</div>
 				`);
 					} else {
@@ -306,17 +328,27 @@ const getCities = (country) => {
 			var cities = result.data.results;
 			console.log(cities);
 			$("#citiesContainer").empty();
-			
+
 			cities.forEach((city) => {
-				$("#citiesContainer").append(`
-				<div class="citiesRow" class="row">
-					<div class="col-8"><h5>${city.name}</h5></div>
-					<div class="col-4">
-						<button id=${city.id} type="button" class="btn btn-primary city-btn">Top Restaurants</button>
+				const onClick = (e) => {
+					$("#citiesContainer").empty();
+					$("#citiesModal").modal("show");
+					$("#citiesModalLabel").html(city.name);
+					$("#citiesContainer").append(`
+					<div class="citiesRow" class="row">
+						<button id=${city.id} type="button" class="btn btn-primary restaurants-btn">Top Restaurants</button>
+						<button id=${city.id} type="button" class="btn btn-primary hotels-btn">Top Hotels</button>
+						<button id=${city.id} type="button" class="btn btn-primary nightlife-btn">Top Nightlife</button>
 					</div>
-					
-				</div>
-				`);
+					`);
+					map.setView(
+						[city.coordinates.latitude, city.coordinates.longitude],
+						12
+					);
+				};
+				L.marker([city.coordinates.latitude, city.coordinates.longitude])
+					.addTo(map)
+					.on("click", onClick);
 			});
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
@@ -327,39 +359,103 @@ const getCities = (country) => {
 
 //TOP RESTAURANTS API CALL
 
-$("#citiesContainer").on("click", ".city-btn", (event) => {
-	const cityId = event.target.id
-	console.log(cityId)
+$("#citiesContainer").on("click", ".restaurants-btn", (event) => {
+	const cityId = event.target.id;
+
 	$.ajax({
-		url: "libs/php/triposoPOI.php",
+		url: "libs/php/triposoRestaurants.php",
 		type: "POST",
 		dataType: "json",
 		data: {
 			cityId: cityId,
 		},
 		success: (result) => {
-			console.log(result)
+			console.log(result);
 			var restaurants = result.data.results;
 			$("#citiesModal").modal("hide");
-			$("#restaurantsModal").modal("show");
-			$("#restaurantsContainer").empty();
-			
+			console.log(restaurants);
+
 			restaurants.forEach((restaurant) => {
-				$("#restaurantsContainer").append(`
-				<div class="restaurantsRow" class="row">
-					<div class="col-3"><p>${restaurant.name}</p></div>
-					<div class="col-8"><p>${restaurant.intro}</p></div>
-					
-				</div>
-				`); 
-			})
-			
+				L.marker([
+					restaurant.coordinates.latitude,
+					restaurant.coordinates.longitude,
+				])
+					.addTo(map)
+					.bindPopup(`<h6>${restaurant.name}</h6><p>${restaurant.intro}</p>`);
+			});
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
 			console.log(textStatus);
 		},
 	});
-})
+});
+
+//TOP HOTELS API CALL
+
+$("#citiesContainer").on("click", ".hotels-btn", (event) => {
+	const cityId = event.target.id;
+
+	$.ajax({
+		url: "libs/php/triposoHotels.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			cityId: cityId,
+		},
+		success: (result) => {
+			console.log(result);
+			var hotels = result.data.results;
+			$("#citiesModal").modal("hide");
+			console.log(hotels);
+
+			hotels.forEach((hotel) => {
+				L.marker([
+					hotel.coordinates.latitude,
+					hotel.coordinates.longitude,
+				])
+					.addTo(map)
+					.bindPopup(`<h6>${hotel.name}</h6><p>${hotel.intro}</p>`);
+			});
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(textStatus);
+		},
+	});
+});
+
+//TOP NIGHTLIFE API CALL
+
+$("#citiesContainer").on("click", ".nightlife-btn", (event) => {
+	const cityId = event.target.id;
+
+	$.ajax({
+		url: "libs/php/triposoNightlife.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			cityId: cityId,
+		},
+		success: (result) => {
+			console.log(result);
+			var nightlife = result.data.results;
+			$("#citiesModal").modal("hide");
+			console.log(nightlife);
+
+			nightlife.forEach((nightlife) => {
+				L.marker([
+					nightlife.coordinates.latitude,
+					nightlife.coordinates.longitude,
+				])
+					.addTo(map)
+					.bindPopup(`<h6>${nightlife.name}</h6><p>${nightlife.intro}</p>`);
+			});
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(textStatus);
+		},
+	});
+});
+
 
 
 $("#countries-dropdown").on("change", () => {
