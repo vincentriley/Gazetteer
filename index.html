@@ -21,7 +21,7 @@
 			src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 			integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
 			crossorigin=""
-		></script>
+		></script> 
 		<link rel="stylesheet" href="styles.css" />
 	</head>
 	<body>
@@ -78,7 +78,7 @@
 		
 		<div
 			class="modal"
-			id="newsModal"
+			id="generalModal"
 			tabindex="-1"
 			aria-labelledby="exampleModalLabel"
 			aria-hidden="true"
@@ -87,46 +87,11 @@
 				<div class="modal-content">
 					<div class="modal-header">
 						
-						<h5 class="modal-title" id="newsModalLabel">Latest stories</h5>
+						<h5 class="modal-title" id="generalModalLabel"></h5>
 						
 					</div>
-					<div id="newsModalBody" class="modal-body">
-						<div id="newsStoryContainer" class="container-fluid">
-							
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button
-							type="button"
-							class="btn btn-secondary"
-							data-bs-dismiss="modal"
-						>
-							Close
-						</button>
-						
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!--WEATHER MODAL-->
-
-		<div
-			class="modal"
-			id="weatherModal"
-			tabindex="-1"
-			aria-labelledby="exampleModalLabel"
-			aria-hidden="true"
-		>
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						
-						<h5 class="modal-title" id="newsModalLabel">Latest Weather</h5>
-						
-					</div>
-					<div id="newsModalBody" class="modal-body">
-						<div id="weatherContainer" class="container">
+					<div id="generalModalBody" class="modal-body">
+						<div id="generalContainer" class="container">
 							
 						</div>
 					</div>
@@ -180,44 +145,10 @@
 			</div>
 		</div>
 
-		<!--RESTAURANTS MODAL-->
-
-		<div
-			class="modal"
-			id="restaurantsModal"
-			tabindex="-1"
-			aria-labelledby="exampleModalLabel"
-			aria-hidden="true"
-		>
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						
-						<h5 class="modal-title" id="restaurantModalLabel">Top Rated Restaurants</h5>
-						
-					</div>
-					<div id="newsModalBody" class="modal-body">
-						
-						<div id="restaurantsContainer" class="container">
-							
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button
-							type="button"
-							class="btn btn-secondary"
-							data-bs-dismiss="modal"
-						>
-							Close
-						</button>
-						
-					</div>
-				</div>
-			</div>
-		</div>
+		
 
 		<!--SCRIPTS-->
-		<script
+		<<script
 			src="https://code.jquery.com/jquery-3.6.0.min.js"
 			integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
 			crossorigin="anonymous"
@@ -232,7 +163,7 @@
 			integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
 			crossorigin="anonymous"
 		></script>
-		<script src="https://kit.fontawesome.com/4b24870758.js" crossorigin="anonymous"></script>
+		<script src="https://kit.fontawesome.com/4b24870758.js" crossorigin="anonymous"></script> 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.EasyButton/2.4.0/easy-button.min.js" integrity="sha512-Tndo4y/YJooD/mGXS9D6F1YyBcSyrWnnSWQ5Z9IcKt6bljicjyka9qcP99qMFbQ5+omfOtwwIapv1DjBCZcTJQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 		<script src="main.js" type="module"></script>
 	</body>
