@@ -4,7 +4,7 @@ var latlng;
 var country = null;
 var weatherSelected = false;
 var weatherAlertHasFired = false;
-var countryFullName = null
+var countryFullName = null;
 
 const cityClickHandler = () => {
 	console.log("success");
@@ -58,6 +58,7 @@ const renderMapWithUserLocation = () => {
 				success: (result) => {
 					if (!country) {
 						country = result.data.countryCode.toLowerCase();
+						countryFullName = result.data.countryName;
 					} else {
 						return;
 					}
@@ -91,16 +92,18 @@ var data = L.geoJSON(data, {
 	})
 	.addTo(map);
 
+var citiesMarkers = L.layerGroup();
+
 //RENDERS EASYBUTTONS
 
 L.easyButton("fa-globe", (btn, map) => {
 	countryBordersOnMap(country);
-	$("#generalModalLabel").text('')
+	$("#generalModalLabel").text("");
 	$("#generalContainer").empty();
 	$("#generalModal").modal("show");
 	$("#generalContainer").append(`<div class="spinner-border" role="status">
 	<span class="sr-only">Loading...</span>
-  </div>`)
+  </div>`);
 	countrySelection(country);
 }).addTo(map);
 
@@ -108,11 +111,9 @@ L.easyButton("fa-newspaper", (btn, map) => {
 	countryBordersOnMap(country);
 	$("#generalContainer").empty();
 	$("#generalModal").modal("show");
-	
-	$("#generalModalLabel").text(`${countryFullName} headlines:`);
 	$("#generalContainer").append(`<div class="spinner-border" role="status">
 	<span class="sr-only">Loading...</span>
-  </div>`)
+  </div>`);
 	getCountryNews(country);
 }).addTo(map);
 
@@ -181,7 +182,7 @@ const countrySelection = (country) => {
 		success: (result) => {
 			if (result.status.name == "ok") {
 				var selectedCountry = result.data[0];
-				
+
 				currencyCode = selectedCountry["currencyCode"];
 				$.ajax({
 					url: "libs/php/currency.php",
@@ -193,8 +194,8 @@ const countrySelection = (country) => {
 					success: (result) => {
 						if (result.status.name == "ok") {
 							$("#generalModalLabel").html(selectedCountry["countryName"]);
-				$("#generalContainer").empty();
-				$("#generalContainer").append(`
+							$("#generalContainer").empty();
+							$("#generalContainer").append(`
 			<p>Capital: ${selectedCountry["capital"]}</p>
 			<p>Population: ${selectedCountry["population"]}&deg;</p>
 			`);
@@ -232,10 +233,11 @@ map.on("click", (e) => {
 		success: (result) => {
 			hasExactLatLng = true;
 			country = result.data.countryCode.toLowerCase();
-			countryFullName = result.data.countryName
-			console.log(countryFullName)
+			countryFullName = result.data.countryName;
+			console.log(countryFullName);
 			countryBordersOnMap(country);
 			//need to find way of changing value in dropdown list
+
 			hasExactLatLng = false;
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
@@ -256,7 +258,9 @@ map.on("click", (e) => {
 				$("#generalContainer").empty();
 				$("#generalModalLabel").empty();
 				$("#generalModal").modal("show");
-				$("#generalModalLabel").text(`${countryFullName} local weather report:`)
+				$("#generalModalLabel").text(
+					`${countryFullName} local weather report:`
+				);
 				$("#generalContainer").append(`
 			<p>Weather Station Name: ${result.data.name}</p>
 			<p>Temperature: ${(result.data.main.temp - 273).toFixed(1)}&deg;</p>
@@ -269,8 +273,7 @@ map.on("click", (e) => {
 			},
 		});
 		weatherSelected = false;
-	}
-	else {
+	} else {
 		countrySelection(country);
 	}
 });
@@ -289,6 +292,7 @@ const getCountryNews = (country) => {
 			console.log(result);
 			if (result.data.totalResults === 0) {
 				$("#generalContainer").empty();
+				$("#generalModalLabel").text(`${countryFullName} headlines:`);
 				$("#generalContainer").append(
 					"<p>Sorry no news available for this country."
 				);
@@ -298,6 +302,7 @@ const getCountryNews = (country) => {
 				stories.forEach((story) => {
 					if (story.image_url) {
 						$("#generalContainer").empty();
+						$("#generalModalLabel").text(`${countryFullName} headlines:`);
 						$("#generalContainer").append(`
 				<div class="newsStoryRow" class="row">
 					<div class="col-2"><img class="newsImage"  src="${story.image_url}"></img></div>
@@ -361,9 +366,11 @@ const getCities = (country) => {
 					city.coordinates.latitude,
 					city.coordinates.longitude,
 				]);
-				map.addLayer(cityMarker);
+				citiesMarkers.addLayer(cityMarker);
+
 				cityMarker.on("click", onClick);
 			});
+			map.addLayer(citiesMarkers);
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
 			console.log(textStatus);
@@ -385,6 +392,7 @@ $("#citiesContainer").on("click", ".restaurants-btn", (event) => {
 		},
 		success: (result) => {
 			console.log(result);
+			map.removeLayer(citiesMarkers);
 			var restaurants = result.data.results;
 			$("#citiesModal").modal("hide");
 			console.log(restaurants);
@@ -417,6 +425,7 @@ $("#citiesContainer").on("click", ".hotels-btn", (event) => {
 			cityId: cityId,
 		},
 		success: (result) => {
+			map.removeLayer(citiesMarkers);
 			console.log(result);
 			var hotels = result.data.results;
 			$("#citiesModal").modal("hide");
@@ -447,6 +456,7 @@ $("#citiesContainer").on("click", ".nightlife-btn", (event) => {
 			cityId: cityId,
 		},
 		success: (result) => {
+			map.removeLayer(citiesMarkers);
 			console.log(result);
 			var nightlife = result.data.results;
 			$("#citiesModal").modal("hide");
@@ -469,8 +479,7 @@ $("#citiesContainer").on("click", ".nightlife-btn", (event) => {
 
 $("#countries-dropdown").on("change", () => {
 	country = $("#countries-dropdown").val();
-	countryFullName = $('#countries-dropdown :selected').text();
-	console.log(countryFullName)
+	countryFullName = $("#countries-dropdown :selected").text();
+	console.log(countryFullName);
 	countryBordersOnMap(country);
 });
-
