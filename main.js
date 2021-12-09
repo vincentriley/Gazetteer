@@ -67,7 +67,13 @@ const renderMapWithUserLocation = () => {
 					console.log(textStatus);
 				},
 			});
-			map.setView(userCoordinates, 15);
+			if (userCoordinates) {
+				map.setView(userCoordinates, 15);
+				L.marker(userCoordinates)
+					.addTo(map)
+					.bindPopup("Current Location")
+					.openPopup();
+			}
 		});
 	}
 };
@@ -197,7 +203,7 @@ const countrySelection = (country) => {
 							$("#generalContainer").empty();
 							$("#generalContainer").append(`
 			<p>Capital: ${selectedCountry["capital"]}</p>
-			<p>Population: ${selectedCountry["population"]}&deg;</p>
+			<p>Population: ${selectedCountry["population"]}</p>
 			`);
 							$("#generalContainer").append(
 								`<p>Exchange rate to USD: ${result["data"]["rates"][
@@ -237,7 +243,7 @@ map.on("click", (e) => {
 			console.log(countryFullName);
 			countryBordersOnMap(country);
 			//need to find way of changing value in dropdown list
-
+			$("#countries-dropdown").val(result.data.countryCode);
 			hasExactLatLng = false;
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
@@ -292,6 +298,7 @@ const getCountryNews = (country) => {
 			console.log(result);
 			if (result.data.totalResults === 0) {
 				$("#generalContainer").empty();
+				$("generalModalHeader").empty();
 				$("#generalModalLabel").text(`${countryFullName} headlines:`);
 				$("#generalContainer").append(
 					"<p>Sorry no news available for this country."
@@ -302,19 +309,19 @@ const getCountryNews = (country) => {
 				stories.forEach((story) => {
 					if (story.image_url) {
 						$("#generalContainer").empty();
+						$("generalModalHeader").empty();
 						$("#generalModalLabel").text(`${countryFullName} headlines:`);
 						$("#generalContainer").append(`
 				<div class="newsStoryRow" class="row">
-					<div class="col-2"><img class="newsImage"  src="${story.image_url}"></img></div>
-					<div class="col-10" text-truncate><a href="${story.link}"<p>${story.title}</p></a></div>
+					<div class="col-2"><img class="img-fluid"  src="${story.image_url}"></img></div>
+					<div class="col-10"><a href="${story.link}"><div class="text-truncate">${story.title}</div></a></div
 				</div>
 				`);
 					} else {
 						$("#generalContainer").empty();
 						$("#generalContainer").append(`
 				<div class="row">
-					
-					<div class="col-12"><a href="${story.link}"<p>${story.title}</p></a></div>
+					<div class="col-12"><a href="${story.link}"><div class=text-truncate">${story.title}</div></a></div>
 				</div>
 				`);
 					}
@@ -351,11 +358,19 @@ const getCities = (country) => {
 					$("#citiesModal").modal("show");
 					$("#citiesModalLabel").html(city.name);
 					$("#citiesContainer").append(`
-					<div class="citiesRow" class="row">
-						<button id=${city.id} type="button" class="btn btn-primary restaurants-btn">Top Restaurants</button>
-						<button id=${city.id} type="button" class="btn btn-primary hotels-btn">Top Hotels</button>
-						<button id=${city.id} type="button" class="btn btn-primary nightlife-btn">Top Nightlife</button>
-					</div>
+					
+						<div class="citiesFlexRow">
+							<button id=${city.id} type="button" class="btn btn-primary restaurants-btn">Top Restaurants</button>
+						</div>
+						<br>
+						<div class="citiesFlexRow">
+							<button id=${city.id} type="button" class="btn btn-primary hotels-btn">Top Hotels</button>
+						</div>
+						<br>
+						<div class="citiesFlexRow">
+							<button id=${city.id} type="button" class="btn btn-primary nightlife-btn">Top Nightlife</button>
+						</div>
+					
 					`);
 					map.setView(
 						[city.coordinates.latitude, city.coordinates.longitude],

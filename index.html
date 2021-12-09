@@ -23,14 +23,15 @@
 			src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 			integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
 			crossorigin=""
-		></script> 
+		></script>
 		<link rel="stylesheet" href="styles.css" />
 	</head>
 	<body>
 		<nav class="navbar">
-			<select name="countries" id="countries-dropdown" >
-				<option id="countries-dropdown-value" selected disabled>Select Country</option>
-				
+			<select name="countries" id="countries-dropdown">
+				<option id="countries-dropdown-value" selected disabled>
+					Select Country
+				</option>
 			</select>
 		</nav>
 
@@ -38,49 +39,10 @@
 
 		<div id="map"></div>
 
-		
+		<!--General Modal-->
 
-		<!-- General modal -->
 		<div
-			class="modal"
-			id="exampleModal"
-			tabindex="-1"
-			aria-labelledby="exampleModalLabel"
-			aria-hidden="true"
-		>
-			<div class="modal-dialog">
-				<div class="modal-content">
-					<div class="modal-header">
-						<div>
-							<img id="flag" class="img-fluid" alt="flag" />
-						</div id="flagdiv">
-						<h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-						
-					</div>
-					<div class="modal-body">
-						<p id="capital"></p>
-						<p id="population"></p>
-						<p id="currency"></p>
-						<p id="weather"></p>
-					</div>
-					<div class="modal-footer">
-						<button
-							type="button"
-							class="btn btn-secondary"
-							data-bs-dismiss="modal"
-						>
-							Close
-						</button>
-						
-					</div>
-				</div>
-			</div>
-		</div>
-
-<!--News Modal-->
-		
-		<div
-			class="modal"
+			class="modal fade"
 			id="generalModal"
 			tabindex="-1"
 			aria-labelledby="exampleModalLabel"
@@ -88,14 +50,21 @@
 		>
 			<div class="modal-dialog">
 				<div class="modal-content">
-					<div class="modal-header">
-						
-						<h5 class="modal-title" id="generalModalLabel"></h5>
-						
+					<div class="modal-header" id="generalModalHeader">
+						<div class="container-fluid">
+							<div class="row">
+								<div class="col-sm">
+									<h5 class="modal-title" id="generalModalLabel"></h5>
+								</div>
+								<div class="col-sm flag">
+									<img id="flag" />
+								</div>
+							</div>
+						</div>
 					</div>
 					<div id="generalModalBody" class="modal-body">
 						<div id="generalContainer" class="container">
-							
+
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -106,7 +75,6 @@
 						>
 							Close
 						</button>
-						
 					</div>
 				</div>
 			</div>
@@ -124,16 +92,24 @@
 			<div class="modal-dialog city">
 				<div class="modal-content">
 					<div class="modal-header">
-						
-						<h5 class="modal-title" id="citiesModalLabel"></h5>
-						
-					</div>
-					<div id="newsModalBody" class="modal-body">
-						
-						<div id="citiesContainer" class="container">
-							
+						<div class="container">
+							<div class="row">
+								<div class="col-12" id="">
+									<h5 class="text-center" id="citiesModalLabel"></h5>
+								</div>
+							</div>
 						</div>
 					</div>
+
+					<div class="modal-body">
+						<div class="container">
+							<div
+								class="flex-column flex-md-row justify-content-center"
+								id="citiesContainer"
+							></div>
+						</div>
+					</div>
+
 					<div class="modal-footer">
 						<button
 							type="button"
@@ -142,13 +118,10 @@
 						>
 							Close
 						</button>
-						
 					</div>
 				</div>
 			</div>
 		</div>
-
-		
 
 		<!--SCRIPTS-->
 		<script
@@ -161,9 +134,17 @@
 			integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
 			crossorigin="anonymous"
 		></script>
-		
-		<script src="https://kit.fontawesome.com/4b24870758.js" crossorigin="anonymous"></script> 
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.EasyButton/2.4.0/easy-button.min.js" integrity="sha512-Tndo4y/YJooD/mGXS9D6F1YyBcSyrWnnSWQ5Z9IcKt6bljicjyka9qcP99qMFbQ5+omfOtwwIapv1DjBCZcTJQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+		<script
+			src="https://kit.fontawesome.com/4b24870758.js"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.EasyButton/2.4.0/easy-button.min.js"
+			integrity="sha512-Tndo4y/YJooD/mGXS9D6F1YyBcSyrWnnSWQ5Z9IcKt6bljicjyka9qcP99qMFbQ5+omfOtwwIapv1DjBCZcTJQ=="
+			crossorigin="anonymous"
+			referrerpolicy="no-referrer"
+		></script>
 		<!--<script src="./libs/js/leaflet.awesome-markers.js"></script> -->
 		<script src="main.js" type="module"></script>
 	</body>

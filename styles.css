@@ -9,25 +9,45 @@
 
 .navbar {
 	z-index: 1;
-	left: 5%;
+	left: 13%;
 }
 
-#flagdiv {
-	width: 10%;
+@media screen and (max-width: 576px) {
+	.navbar {
+		left: 13%;
+	}
+  }
+
+#flag {
+	height: 50px;
+	width: auto;
 }
 
 .star {
 	font-size: 1.5em;
 }
 
-
-
-.newsImage {
-	height: 3em;
-	width: auto;
+.restaurants-btn {
+	margin-left: auto;
+	margin-right:auto;
 }
 
+
+
 .modal-dialog {
-    margin-top: 1%;
-    margin-left: 5%;
+    margin-bottom: 0;
+}
+
+.modal-header {
+	width: 100%;
+	background-color: rgb(212, 212, 212);
+}
+
+.modal-content {
+	background-color: rgb(212, 212, 212);
+}
+
+.citiesFlexRow {
+	display:flex;
+	justify-content: center;
 }
