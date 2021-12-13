@@ -1,3 +1,7 @@
+body {
+	font-family: "nunito sans", sans-serif;
+}
+
 #map {
 	position: absolute;
 	top: 0;
@@ -9,7 +13,8 @@
 
 .navbar {
 	z-index: 1;
-	left: 13%;
+	left: 5%;
+	position:absolute;
 }
 
 @media screen and (max-width: 576px) {
@@ -18,9 +23,24 @@
 	}
   }
 
-#flag {
+.flagdiv {
+	display:flex;
+	align-items: center;
+}
+
+.flag {
 	height: 50px;
 	width: auto;
+}
+
+.newsrow {
+	text-decoration: none;
+	color: black;
+	
+}
+
+#generalModalLabel {
+	color: white;
 }
 
 .star {
@@ -32,22 +52,33 @@
 	margin-right:auto;
 }
 
+p {
+	font-size: 0.8em;
+}
 
+h5 {
+	font-size: 1em;
+}
 
 .modal-dialog {
     margin-bottom: 0;
 }
 
-.modal-header {
-	width: 100%;
-	background-color: rgb(212, 212, 212);
+#generalModalHeader{
+	
+	background-color: #007006;
 }
 
-.modal-content {
-	background-color: rgb(212, 212, 212);
+.btn-primary {
+	font-size: 0.5em;
 }
 
 .citiesFlexRow {
 	display:flex;
 	justify-content: center;
+}
+
+#generalModalHeader {
+
+	height: 5em;
 }

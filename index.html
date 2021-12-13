@@ -17,13 +17,16 @@
 			integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
 			crossorigin=""
 		/>
-		<!--<link rel="stylesheet" href="css/leaflet.awesome-markers.css">-->
+		<link rel="stylesheet" href="./libs/css/leaflet.extra-markers.min.css" />
 
 		<script
 			src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 			integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
 			crossorigin=""
 		></script>
+		<link href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Inter&family=Noto+Sans&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Inter&family=Noto+Sans&family=Nunito+Sans&display=swap" rel="stylesheet">
 		<link rel="stylesheet" href="styles.css" />
 	</head>
 	<body>
@@ -51,31 +54,27 @@
 			<div class="modal-dialog">
 				<div class="modal-content">
 					<div class="modal-header" id="generalModalHeader">
-						<div class="container-fluid">
-							<div class="row">
-								<div class="col-sm">
-									<h5 class="modal-title" id="generalModalLabel"></h5>
-								</div>
-								<div class="col-sm flag">
-									<img id="flag" />
-								</div>
-							</div>
+						<div class="col-3 flagdiv">
+							<img class="img-fluid flag" id="flag" />
 						</div>
-					</div>
-					<div id="generalModalBody" class="modal-body">
-						<div id="generalContainer" class="container">
+						<div class="d-flex col-7 justify-content-center">
+							<h5 class="modal-title" id="generalModalLabel"></h5>
+						</div>
 
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button
+						<div class="col-1 closebutton">
+							<button
 							type="button"
 							class="btn btn-secondary"
 							data-bs-dismiss="modal"
 						>
-							Close
+							X
 						</button>
+						</div>
 					</div>
+					<!--<div id="generalModalBody" class="modal-body">-->
+					<div id="generalContainer" class="container-fluid"></div>
+					<div id="currencyContainer" class="container-fluid"></div>
+					<!--</div>-->
 				</div>
 			</div>
 		</div>
@@ -99,18 +98,6 @@
 								</div>
 							</div>
 						</div>
-					</div>
-
-					<div class="modal-body">
-						<div class="container">
-							<div
-								class="flex-column flex-md-row justify-content-center"
-								id="citiesContainer"
-							></div>
-						</div>
-					</div>
-
-					<div class="modal-footer">
 						<button
 							type="button"
 							class="btn btn-secondary"
@@ -118,6 +105,14 @@
 						>
 							Close
 						</button>
+					</div>
+
+					<div class="modal-body">
+						<div id="citiesContainer"></div>
+					</div>
+
+					<div class="modal-footer">
+						
 					</div>
 				</div>
 			</div>
@@ -145,7 +140,7 @@
 			crossorigin="anonymous"
 			referrerpolicy="no-referrer"
 		></script>
-		<!--<script src="./libs/js/leaflet.awesome-markers.js"></script> -->
+		<script src="./libs/js/leaflet.extra-markers.min.js"></script>
 		<script src="main.js" type="module"></script>
 	</body>
 </html>

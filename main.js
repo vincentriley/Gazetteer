@@ -5,10 +5,9 @@ var country = null;
 var weatherSelected = false;
 var weatherAlertHasFired = false;
 var countryFullName = null;
+const lightRowColor = "#F7FFF6"
+const darkRowColor = "#BCEBCB" 
 
-const cityClickHandler = () => {
-	console.log("success");
-};
 
 //POPULATES DROPDOWN LIST
 $.ajax({
@@ -31,12 +30,12 @@ $.ajax({
 		}
 	},
 	error: (jqXHR, textStatus, errorThrown) => {
-		console.log("failure");
+		console.log(errorThrown);
 	},
 });
 
 // RENDERS MAP
-var map = L.map("map", { minZoom: 3 }).setView([51.05, -0.09], 2);
+var map = L.map("map", { minZoom: 3 });
 
 const renderMapWithUserLocation = () => {
 	if (map) {
@@ -69,7 +68,7 @@ const renderMapWithUserLocation = () => {
 			});
 			if (userCoordinates) {
 				map.setView(userCoordinates, 15);
-				L.marker(userCoordinates)
+				L.marker(userCoordinates, { icon: userMarker })
 					.addTo(map)
 					.bindPopup("Current Location")
 					.openPopup();
@@ -100,26 +99,62 @@ var data = L.geoJSON(data, {
 
 var citiesMarkers = L.layerGroup();
 
-//RENDERS EASYBUTTONS
+//MARKERS
 
-L.easyButton("fa-globe", (btn, map) => {
-	countryBordersOnMap(country);
-	$("#generalModalLabel").text("");
+var userMarker = L.ExtraMarkers.icon({
+	icon: "fa-home",
+	markerColor: "green",
+	shape: "square",
+	prefix: "fa",
+});
+
+var restaurantMarker = L.ExtraMarkers.icon({
+	icon: "fa-hamburger",
+	markerColor: "red",
+	shape: "square",
+	prefix: "fa",
+});
+
+var hotelMarker = L.ExtraMarkers.icon({
+	icon: "fa-bed",
+	markerColor: "blue",
+	shape: "square",
+	prefix: "fa",
+});
+
+var nightlifeMarker = L.ExtraMarkers.icon({
+	icon: "fa-music",
+	markerColor: "pink",
+	shape: "square",
+	prefix: "fa",
+});
+
+var cityMarkerIcon = L.ExtraMarkers.icon({
+	icon: "fa-city",
+	markerColor: "yellow",
+	shape: "square",
+	prefix: "fa",
+});
+
+//RENDERS EASYBUTTONS
+const showModal = () => {
+	$("generalModalHeader").empty();
 	$("#generalContainer").empty();
 	$("#generalModal").modal("show");
 	$("#generalContainer").append(`<div class="spinner-border" role="status">
 	<span class="sr-only">Loading...</span>
   </div>`);
+};
+
+L.easyButton("fa-globe", (btn, map) => {
+	countryBordersOnMap(country);
+	showModal();
 	countrySelection(country);
 }).addTo(map);
 
 L.easyButton("fa-newspaper", (btn, map) => {
 	countryBordersOnMap(country);
-	$("#generalContainer").empty();
-	$("#generalModal").modal("show");
-	$("#generalContainer").append(`<div class="spinner-border" role="status">
-	<span class="sr-only">Loading...</span>
-  </div>`);
+	showModal();
 	getCountryNews(country);
 }).addTo(map);
 
@@ -127,7 +162,7 @@ L.easyButton("fa-cloud-sun", (btn, map) => {
 	weatherSelected = true;
 	if (!weatherAlertHasFired) {
 		alert(
-			"Please click on a point on the map for most recent weather forecast!"
+			"Please click on points on the map for the most recent weather forecast! To return to country data selection please click the weather button again!"
 		);
 		weatherAlertHasFired = true;
 	}
@@ -168,15 +203,17 @@ const countryBordersOnMap = (country) => {
 	});
 };
 
-//GENERAL BUTTON API CALLS
+//GENERAL BUTTON API CALL
 
 const countrySelection = (country) => {
-	$("#flag").attr(
-		"src",
-		"http://www.geonames.org/flags/x/" + country.toLowerCase() + ".gif"
-	);
-
-	var currencyCode = "";
+	var currencyCode = null;
+	var capital = null;
+	var population = null;
+	var language = null;
+	const getLanguage = (code) => {
+		const lang = new Intl.DisplayNames(['en'], {type: 'language'});
+		return lang.of(code);
+	}
 
 	$.ajax({
 		url: "libs/php/countryInfo.php",
@@ -188,9 +225,79 @@ const countrySelection = (country) => {
 		success: (result) => {
 			if (result.status.name == "ok") {
 				var selectedCountry = result.data[0];
-
 				currencyCode = selectedCountry["currencyCode"];
-				$.ajax({
+				capital = selectedCountry["capital"];
+				population = selectedCountry["population"];
+				language = getLanguage(selectedCountry["languages"].substr(0,2))
+
+				showModal();
+							$("#generalContainer").empty();
+							$("#generalModalLabel").text(countryFullName);
+							$("#flag").attr(
+								"src",
+								"http://www.geonames.org/flags/x/" +
+									country.toLowerCase() +
+									".gif"
+							);
+
+							//Starting 2nd january when free api renews delete following 4 lines:
+							
+							$("#generalContainer").append(
+								`
+								<div class="row" style="background-color:${darkRowColor}">
+									<div class="col-1">
+										<i class="fas fa-archway"></i>
+									</div>
+									<div class="col-2">
+										<p>Capital</p>
+									</div>
+									<div class="col-2 offset-6">
+										<p>${capital}</p>
+									</div>
+								</div>
+
+								<div class="row" style="background-color:${lightRowColor}">
+									<div class="col-1">
+										<i class="fas fa-user-friends"></i>
+									</div>
+									<div class="col-2">
+										<p>Population</p>
+									</div>
+									<div class="col-2 offset-6">
+										<p>${population}</p>
+									</div>
+								</div>
+								
+								<div class="row" style="background-color:${darkRowColor}">
+									<div class="col-1">
+										<i class="fas fa-language"></i>
+									</div>
+									<div class="col-2">
+										<p>Language</p>
+									</div>
+									<div class="col-2 offset-6">
+										<p>${language}</p>
+									</div>
+								</div>
+
+								<div class="row" style="background-color:${lightRowColor}">
+									<div class="col-1">
+										<i class="fas fa-coins"></i>
+									</div>
+									<div class="col-5">
+										<p>USD exchange rate</p>
+									</div>
+									<div class="col-2 offset-3">
+										<p>tbc</p>
+									</div>
+								</div>
+								`
+								
+							);
+
+				//And uncomment these
+
+				/*$.ajax({
 					url: "libs/php/currency.php",
 					type: "POST",
 					dataType: "json",
@@ -199,27 +306,33 @@ const countrySelection = (country) => {
 					},
 					success: (result) => {
 						if (result.status.name == "ok") {
-							$("#generalModalLabel").html(selectedCountry["countryName"]);
+							showModal();
 							$("#generalContainer").empty();
-							$("#generalContainer").append(`
-			<p>Capital: ${selectedCountry["capital"]}</p>
-			<p>Population: ${selectedCountry["population"]}</p>
-			`);
+							$("#generalModalLabel").text(countryFullName);
+							$("#flag").attr(
+								"src",
+								"http://www.geonames.org/flags/x/" +
+									country.toLowerCase() +
+									".gif"
+							);
+							
 							$("#generalContainer").append(
-								`<p>Exchange rate to USD: ${result["data"]["rates"][
-									currencyCode
-								].toFixed(2)} ${currencyCode}</p>`
+								`<p>Capital: ${capital}</p>
+								<p>Population: ${population}</p>
+								<p>Exchange rate to USD: ${result["data"]["rates"][currencyCode].toFixed(
+									2
+								)} ${currencyCode}</p>`
 							);
 						}
 					},
 					error: (jqXHR, textStatus, errorThrown) => {
 						console.log(errorThrown);
 					},
-				});
+				});*/
 			}
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
-			console.log("failure");
+			console.log(errorThrown);
 		},
 	});
 };
@@ -240,48 +353,100 @@ map.on("click", (e) => {
 			hasExactLatLng = true;
 			country = result.data.countryCode.toLowerCase();
 			countryFullName = result.data.countryName;
-			console.log(countryFullName);
+
 			countryBordersOnMap(country);
-			//need to find way of changing value in dropdown list
+			if (!weatherSelected) {
+				countrySelection(country);
+			}
 			$("#countries-dropdown").val(result.data.countryCode);
 			hasExactLatLng = false;
+			if (weatherSelected) {
+				$.ajax({
+					url: "libs/php/getWeather.php",
+					type: "POST",
+					dataType: "json",
+					data: {
+						lat: latlng.lat,
+						long: latlng.lng,
+					},
+					success: (result) => {
+						showModal();
+						$("#generalContainer").empty();
+						$("#generalModalLabel").empty();
+						$("#flag").attr(
+							"src",
+							"http://www.geonames.org/flags/x/" + country.toLowerCase() + ".gif"
+						);
+						$("#generalModalLabel").text(
+							`${countryFullName} local weather:`
+						);
+						$("#generalContainer").append(`
+					
+
+					<div class="row" style="background-color:${darkRowColor}">
+									<div class="col-1">
+										<i class="fas fa-broadcast-tower"></i>
+									</div>
+									<div class="col-6">
+										<p>Weather Station Name</p>
+									</div>
+									<div class="col-2 offset-3">
+										<p>${result.data.name ? result.data.name : "Unavailable"}</p>
+									</div>
+								</div>
+
+								<div class="row" style="background-color:${lightRowColor}">
+									<div class="col-1">
+										<i class="fas fa-temperature-high"></i>
+									</div>
+									<div class="col-2">
+										<p>Temperature</p>
+									</div>
+									<div class="col-2 offset-7">
+										<p>${(result.data.main.temp - 273).toFixed(1)}&deg;</p>
+									</div>
+								</div>
+								
+								<div class="row" style="background-color:${darkRowColor}">
+									<div class="col-1">
+										<i class="fas fa-umbrella"></i>
+									</div>
+									<div class="col-2">
+										<p>Humidity</p>
+									</div>
+									<div class="col-2 offset-7">
+										<p>${result.data.main.humidity}%</p>
+									</div>
+								</div>
+
+								<div class="row" style="background-color:${lightRowColor}">
+									<div class="col-1">
+										<i class="fas fa-wind"></i>
+									</div>
+									<div class="col-2">
+										<p>Wind Speed</p>
+									</div>
+									<div class="col-2 offset-7">
+										<p>${result.data.wind.speed} kn</p>
+									</div>
+								</div>
+
+					`);
+					},
+					error: (jqXHR, textStatus, errorThrown) => {
+						console.log(errorThrown);
+					},
+				});
+				
+			} else {
+				countrySelection(country);
+			}
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
-			console.log(textStatus);
+			console.log(errorThrown);
 		},
 	});
-	if (weatherSelected) {
-		$.ajax({
-			url: "libs/php/getWeather.php",
-			type: "POST",
-			dataType: "json",
-			data: {
-				lat: latlng.lat,
-				long: latlng.lng,
-			},
-			success: (result) => {
-				console.log(result.data);
-				$("#generalContainer").empty();
-				$("#generalModalLabel").empty();
-				$("#generalModal").modal("show");
-				$("#generalModalLabel").text(
-					`${countryFullName} local weather report:`
-				);
-				$("#generalContainer").append(`
-			<p>Weather Station Name: ${result.data.name}</p>
-			<p>Temperature: ${(result.data.main.temp - 273).toFixed(1)}&deg;</p>
-			<p>Humidity: ${result.data.main.humidity}%</p>
-			<p>Wind Speed: ${result.data.wind.speed}</p>
-			`);
-			},
-			error: (jqXHR, textStatus, errorThrown) => {
-				console.log(errorThrown);
-			},
-		});
-		weatherSelected = false;
-	} else {
-		countrySelection(country);
-	}
+	
 });
 
 //NEWS BUTTON API CALL
@@ -295,36 +460,45 @@ const getCountryNews = (country) => {
 			country: country,
 		},
 		success: (result) => {
-			console.log(result);
-			if (result.data.totalResults === 0) {
+			showModal();
+			if (result.data.totalResults === 0 || result.data.status === "error") {
 				$("#generalContainer").empty();
-				$("generalModalHeader").empty();
 				$("#generalModalLabel").text(`${countryFullName} headlines:`);
+				$("#flag").attr(
+					"src",
+					"http://www.geonames.org/flags/x/" + country.toLowerCase() + ".gif"
+				);
 				$("#generalContainer").append(
-					"<p>Sorry no news available for this country."
+					"<p>Sorry no news is currently available for this country."
 				);
 			} else {
 				var stories = result.data.results;
-				console.log(stories);
+				$("#generalContainer").empty();
+				var altRowColor = false;
 				stories.forEach((story) => {
 					if (story.image_url) {
-						$("#generalContainer").empty();
-						$("generalModalHeader").empty();
 						$("#generalModalLabel").text(`${countryFullName} headlines:`);
+						$("#flag").attr(
+							"src",
+							"http://www.geonames.org/flags/x/" +
+								country.toLowerCase() +
+								".gif"
+						);
 						$("#generalContainer").append(`
-				<div class="newsStoryRow" class="row">
+				<div class="row" style="background-color:${altRowColor ? lightRowColor : darkRowColor}">
 					<div class="col-2"><img class="img-fluid"  src="${story.image_url}"></img></div>
-					<div class="col-10"><a href="${story.link}"><div class="text-truncate">${story.title}</div></a></div
+					<div class="col-10"><a href="${story.link}" class="newsrow"><div class="text-truncate">${story.title}</div></a></div
 				</div>
 				`);
 					} else {
-						$("#generalContainer").empty();
+						$("#generalModalLabel").text(`${countryFullName} headlines:`);
 						$("#generalContainer").append(`
-				<div class="row">
-					<div class="col-12"><a href="${story.link}"><div class=text-truncate">${story.title}</div></a></div>
+				<div class="row" style="background-color:${altRowColor ? lightRowColor : darkRowColor}">
+					<div class="col-12"><a href="${story.link}" class="newsrow"><div class="text-truncate">${story.title}</div></a></div>
 				</div>
 				`);
 					}
+				altRowColor = !altRowColor
 				});
 			}
 		},
@@ -349,7 +523,7 @@ const getCities = (country) => {
 		},
 		success: (result) => {
 			var cities = result.data.results;
-			console.log(cities);
+			
 			$("#generalContainer").empty();
 
 			cities.forEach((city) => {
@@ -359,17 +533,45 @@ const getCities = (country) => {
 					$("#citiesModalLabel").html(city.name);
 					$("#citiesContainer").append(`
 					
-						<div class="citiesFlexRow">
-							<button id=${city.id} type="button" class="btn btn-primary restaurants-btn">Top Restaurants</button>
-						</div>
-						<br>
-						<div class="citiesFlexRow">
-							<button id=${city.id} type="button" class="btn btn-primary hotels-btn">Top Hotels</button>
-						</div>
-						<br>
-						<div class="citiesFlexRow">
-							<button id=${city.id} type="button" class="btn btn-primary nightlife-btn">Top Nightlife</button>
-						</div>
+						
+
+						<div class="row" style="background-color:${darkRowColor}">
+									<div class="col-1">
+										<i class="fas fa-hamburger"></i>
+									</div>
+									<div class="col-4">
+										<p>Top Restaurants</p>
+									</div>
+									<div class="col-3 offset-3">
+									<button id=${city.id} type="button" class="btn btn-primary restaurants-btn">Top Restaurants</button>
+									</div>
+								</div>
+
+								<div class="row" style="background-color:${lightRowColor}">
+									<div class="col-1">
+										<i class="fas fa-bed"></i>
+									</div>
+									<div class="col-4">
+										<p>Top Hotels</p>
+									</div>
+									<div class="col-3 offset-3">
+									<button id=${city.id} type="button" class="btn btn-primary hotels-btn">Top Hotels</button>
+									</div>
+								</div>
+								
+								<div class="row" style="background-color:${darkRowColor}">
+									<div class="col-1">
+										<i class="fas fa-music"></i>
+									</div>
+									<div class="col-4">
+										<p>Top Nightlife</p>
+									</div>
+									<div class="col-3 offset-3">
+										<button id=${city.id} type="button" class="btn btn-primary nightlife-btn">Top Nightlife</button>
+									</div>
+								</div>
+
+								
 					
 					`);
 					map.setView(
@@ -377,10 +579,10 @@ const getCities = (country) => {
 						12
 					);
 				};
-				var cityMarker = new L.Marker([
-					city.coordinates.latitude,
-					city.coordinates.longitude,
-				]);
+				var cityMarker = new L.Marker(
+					[city.coordinates.latitude, city.coordinates.longitude],
+					{ icon: cityMarkerIcon }
+				);
 				citiesMarkers.addLayer(cityMarker);
 
 				cityMarker.on("click", onClick);
@@ -388,7 +590,7 @@ const getCities = (country) => {
 			map.addLayer(citiesMarkers);
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
-			console.log(textStatus);
+			console.log(errorThrown);
 		},
 	});
 };
@@ -406,23 +608,23 @@ $("#citiesContainer").on("click", ".restaurants-btn", (event) => {
 			cityId: cityId,
 		},
 		success: (result) => {
-			console.log(result);
+			
 			map.removeLayer(citiesMarkers);
 			var restaurants = result.data.results;
 			$("#citiesModal").modal("hide");
-			console.log(restaurants);
+			
 
 			restaurants.forEach((restaurant) => {
-				L.marker([
-					restaurant.coordinates.latitude,
-					restaurant.coordinates.longitude,
-				])
+				L.marker(
+					[restaurant.coordinates.latitude, restaurant.coordinates.longitude],
+					{ icon: restaurantMarker }
+				)
 					.addTo(map)
 					.bindPopup(`<h6>${restaurant.name}</h6><p>${restaurant.intro}</p>`);
 			});
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
-			console.log(textStatus);
+			console.log(errorThrown);
 		},
 	});
 });
@@ -441,19 +643,18 @@ $("#citiesContainer").on("click", ".hotels-btn", (event) => {
 		},
 		success: (result) => {
 			map.removeLayer(citiesMarkers);
-			console.log(result);
 			var hotels = result.data.results;
 			$("#citiesModal").modal("hide");
-			console.log(hotels);
-
 			hotels.forEach((hotel) => {
-				L.marker([hotel.coordinates.latitude, hotel.coordinates.longitude])
+				L.marker([hotel.coordinates.latitude, hotel.coordinates.longitude], {
+					icon: hotelMarker,
+				})
 					.addTo(map)
 					.bindPopup(`<h6>${hotel.name}</h6><p>${hotel.intro}</p>`);
 			});
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
-			console.log(textStatus);
+			console.log(errorThrown);
 		},
 	});
 });
@@ -472,22 +673,19 @@ $("#citiesContainer").on("click", ".nightlife-btn", (event) => {
 		},
 		success: (result) => {
 			map.removeLayer(citiesMarkers);
-			console.log(result);
 			var nightlife = result.data.results;
 			$("#citiesModal").modal("hide");
-			console.log(nightlife);
-
 			nightlife.forEach((nightlife) => {
-				L.marker([
-					nightlife.coordinates.latitude,
-					nightlife.coordinates.longitude,
-				])
+				L.marker(
+					[nightlife.coordinates.latitude, nightlife.coordinates.longitude],
+					{ icon: nightlifeMarker }
+				)
 					.addTo(map)
 					.bindPopup(`<h6>${nightlife.name}</h6><p>${nightlife.intro}</p>`);
 			});
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
-			console.log(textStatus);
+			console.log(errorThrown);
 		},
 	});
 });
@@ -495,6 +693,7 @@ $("#citiesContainer").on("click", ".nightlife-btn", (event) => {
 $("#countries-dropdown").on("change", () => {
 	country = $("#countries-dropdown").val();
 	countryFullName = $("#countries-dropdown :selected").text();
-	console.log(countryFullName);
+	
 	countryBordersOnMap(country);
 });
+
