@@ -5,8 +5,9 @@ var country = null;
 var weatherSelected = false;
 var weatherAlertHasFired = false;
 var countryFullName = null;
-const lightRowColor = "#F7FFF6";
-const darkRowColor = "#BCEBCB";
+const lightRowColor = "#ffffff";
+const darkRowColor = "#bbc7fb49";
+var userCoordinates = null;
 
 //POPULATES DROPDOWN LIST
 $.ajax({
@@ -34,12 +35,24 @@ $.ajax({
 });
 
 // RENDERS MAP
-var map = L.map("map", { minZoom: 3 });
+var map = L.map("map", { minZoom: 3 }).setView(
+	[53.8, 1.54],
+	13
+);
+
+var OpenStreetMap_Mapnik = L.tileLayer(
+	"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+	{
+		maxZoom: 19,
+		attribution:
+			'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	}
+).addTo(map);
 
 const renderMapWithUserLocation = () => {
 	if (map) {
 		navigator.geolocation.getCurrentPosition((GeolocationPosition) => {
-			var userCoordinates = [
+			userCoordinates = [
 				GeolocationPosition.coords.latitude,
 				GeolocationPosition.coords.longitude,
 			];
@@ -71,6 +84,8 @@ const renderMapWithUserLocation = () => {
 					.addTo(map)
 					.bindPopup("Current Location")
 					.openPopup();
+			} else {
+				map.setView([53.8, 1.54]);
 			}
 		});
 	}
@@ -78,14 +93,6 @@ const renderMapWithUserLocation = () => {
 
 renderMapWithUserLocation();
 
-var OpenStreetMap_Mapnik = L.tileLayer(
-	"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-	{
-		maxZoom: 19,
-		attribution:
-			'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-	}
-).addTo(map);
 var data = L.geoJSON(data, {
 	style: function (feature) {
 		return { color: feature.properties.color };
@@ -138,6 +145,8 @@ var cityMarkerIcon = L.ExtraMarkers.icon({
 //RENDERS EASYBUTTONS
 const showModal = () => {
 	$("generalModalHeader").empty();
+	$("#generalModalHeader").css("background-image", "none");
+	$("#generalModalHeader").css("color", "white");
 	$("#generalContainer").empty();
 	$("#generalModal").modal("show");
 	$("#generalContainer").append(`<div class="spinner-border" role="status">
@@ -231,6 +240,7 @@ const countrySelection = (country) => {
 
 				showModal();
 				$("#generalContainer").empty();
+
 				$("#generalModalLabel").text(countryFullName);
 				$("#flag").attr(
 					"src",
@@ -366,7 +376,7 @@ map.on("click", (e) => {
 						long: latlng.lng,
 					},
 					success: (result) => {
-						console.log(result)
+						console.log(result);
 						showModal();
 						$("#generalContainer").empty();
 						$("#generalModalLabel").empty();
@@ -376,27 +386,35 @@ map.on("click", (e) => {
 								country.toLowerCase() +
 								".gif"
 						);
-						$("#generalModalLabel").text(`${countryFullName} local weather:`);
+						$("#generalModalLabel").text(`${countryFullName} Local Weather`);
 						if (result.data.weather[0].description === "overcast clouds") {
 							$("#generalModalHeader").css(
 								"background-image",
 								"url(" + "./libs/img/overcastClouds.jpg" + ")"
 							);
-						} else if (result.data.weather[0].description === "few clouds" || result.data.weather[0].description === "scattered clouds" || result.data.weather[0].description === "broken clouds") {
+							$("#generalModalHeader").css("color", "white");
+						} else if (
+							result.data.weather[0].description === "few clouds" ||
+							result.data.weather[0].description === "scattered clouds" ||
+							result.data.weather[0].description === "broken clouds"
+						) {
 							$("#generalModalHeader").css(
 								"background-image",
 								"url(" + "./libs/img/lightClouds.jpg" + ")"
 							);
+							$("#generalModalHeader").css("color", "black");
 						} else if (result.data.weather[0].description.includes("snow")) {
 							$("#generalModalHeader").css(
 								"background-image",
 								"url(" + "./libs/img/snow.jpg" + ")"
 							);
+							$("#generalModalHeader").css("color", "white");
 						} else {
 							$("#generalModalHeader").css(
 								"background-image",
 								"url(" + "./libs/img/sun.jpg" + ")"
 							);
+							$("#generalModalHeader").css("color", "white");
 						}
 						$("#generalContainer").append(`
 					
@@ -405,10 +423,10 @@ map.on("click", (e) => {
 									<div class="col-1">
 										<i class="fas fa-broadcast-tower"></i>
 									</div>
-									<div class="col-6">
+									<div class="col-7">
 										<p>Weather Station Name</p>
 									</div>
-									<div class="col-2 offset-3">
+									<div class="col-4">
 										<p>${result.data.name ? result.data.name : "Unavailable"}</p>
 									</div>
 								</div>
@@ -417,10 +435,10 @@ map.on("click", (e) => {
 									<div class="col-1">
 										<i class="fas fa-cloud-sun"></i>
 									</div>
-									<div class="col-6">
+									<div class="col-2">
 										<p>Description</p>
 									</div>
-									<div class="col-2 offset-3">
+									<div class="col-4 offset-5">
 										<p>${result.data.weather[0].description}</p>
 									</div>
 								</div>
@@ -432,7 +450,7 @@ map.on("click", (e) => {
 									<div class="col-2">
 										<p>Temperature</p>
 									</div>
-									<div class="col-2 offset-7">
+									<div class="col-4 offset-5">
 										<p>${(result.data.main.temp - 273).toFixed(1)}&deg;</p>
 									</div>
 								</div>
@@ -444,7 +462,7 @@ map.on("click", (e) => {
 									<div class="col-2">
 										<p>Humidity</p>
 									</div>
-									<div class="col-2 offset-7">
+									<div class="col-4 offset-5">
 										<p>${result.data.main.humidity}%</p>
 									</div>
 								</div>
@@ -456,7 +474,7 @@ map.on("click", (e) => {
 									<div class="col-2">
 										<p>Wind Speed</p>
 									</div>
-									<div class="col-2 offset-7">
+									<div class="col-4 offset-5">
 										<p>${result.data.wind.speed} kn</p>
 									</div>
 								</div>
@@ -505,7 +523,7 @@ const getCountryNews = (country) => {
 				var altRowColor = false;
 				stories.forEach((story) => {
 					if (story.image_url) {
-						$("#generalModalLabel").text(`${countryFullName} headlines:`);
+						$("#generalModalLabel").text(`${countryFullName} headlines`);
 						$("#flag").attr(
 							"src",
 							"http://www.geonames.org/flags/x/" +
@@ -516,10 +534,12 @@ const getCountryNews = (country) => {
 				<div class="row" style="background-color:${
 					altRowColor ? lightRowColor : darkRowColor
 				}">
-					<div class="col-2"><img class="img-fluid"  src="${story.image_url}"></img></div>
+					<div class="col-2 newsImageDiv"><img class="img-fluid newsimg"  src="${
+						story.image_url
+					}"></img></div>
 					<div class="col-10"><a href="${
 						story.link
-					}" class="newsrow"><div class="text-truncate">${
+					}" class="newsrow"><div class="text-truncate newstext">${
 							story.title
 						}</div></a></div
 				</div>
@@ -532,7 +552,7 @@ const getCountryNews = (country) => {
 				}">
 					<div class="col-12"><a href="${
 						story.link
-					}" class="newsrow"><div class="text-truncate">${
+					}" class="newsrow"><div class="text-truncate newstext">${
 							story.title
 						}</div></a></div>
 				</div>
