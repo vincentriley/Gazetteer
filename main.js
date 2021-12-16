@@ -35,15 +35,13 @@ $.ajax({
 });
 
 // RENDERS MAP
-var map = L.map("map", { minZoom: 3 }).setView(
-	[53.8, 1.54],
-	13
-);
+var map = L.map("map").setView([53.8, 1.54], 13);
 
 var OpenStreetMap_Mapnik = L.tileLayer(
 	"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 	{
 		maxZoom: 19,
+		minZoom: 1,
 		attribution:
 			'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 	}
@@ -85,7 +83,7 @@ const renderMapWithUserLocation = () => {
 					.bindPopup("Current Location")
 					.openPopup();
 			} else {
-				map.setView([53.8, 1.54]);
+				map.setView([53.8, 1.54], 13);
 			}
 		});
 	}
@@ -167,7 +165,7 @@ L.easyButton("fa-newspaper", (btn, map) => {
 }).addTo(map);
 
 L.easyButton("fa-cloud-sun", (btn, map) => {
-	weatherSelected = true;
+	weatherSelected = !weatherSelected;
 	if (!weatherAlertHasFired) {
 		alert(
 			"Please click on points on the map for the most recent weather forecast! To return to country data selection please click the weather button again!"
