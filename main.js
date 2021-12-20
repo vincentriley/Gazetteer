@@ -1,6 +1,5 @@
 //GLOBALS
-var hasExactLatLng = false;
-var latlng;
+var latlng = null;
 var country = null;
 var weatherSelected = false;
 var weatherAlertHasFired = false;
@@ -91,7 +90,7 @@ const renderMapWithUserLocation = () => {
 
 renderMapWithUserLocation();
 
-var data = L.geoJSON(data, {
+/*var data = L.geoJSON(data, {
 	style: function (feature) {
 		return { color: feature.properties.color };
 	},
@@ -99,7 +98,7 @@ var data = L.geoJSON(data, {
 	.bindPopup(function (layer) {
 		return layer.feature.properties.description;
 	})
-	.addTo(map);
+	.addTo(map); */
 
 var citiesMarkers = L.layerGroup();
 
@@ -140,7 +139,8 @@ var cityMarkerIcon = L.ExtraMarkers.icon({
 	prefix: "fa",
 });
 
-//RENDERS EASYBUTTONS
+//SHOW MODAL
+
 const showModal = () => {
 	$("generalModalHeader").empty();
 	$("#generalModalHeader").css("background-image", "none");
@@ -151,6 +151,8 @@ const showModal = () => {
 	<span class="sr-only">Loading...</span>
   </div>`);
 };
+
+//RENDERS EASYBUTTONS
 
 L.easyButton("fa-globe", (btn, map) => {
 	countryBordersOnMap(country);
@@ -171,6 +173,11 @@ L.easyButton("fa-cloud-sun", (btn, map) => {
 			"Please click on points on the map for the most recent weather forecast! To return to country data selection please click the weather button again!"
 		);
 		weatherAlertHasFired = true;
+	}
+	if (weatherSelected) {
+		btn.button.style.backgroundColor = "lightgreen";
+	} else {
+		btn.button.style.backgroundColor = null;
 	}
 }).addTo(map);
 
@@ -216,6 +223,7 @@ const countrySelection = (country) => {
 	var capital = null;
 	var population = null;
 	var language = null;
+	//function which converts language code to language name
 	const getLanguage = (code) => {
 		const lang = new Intl.DisplayNames(["en"], { type: "language" });
 		return lang.of(code);
@@ -235,17 +243,15 @@ const countrySelection = (country) => {
 				capital = selectedCountry["capital"];
 				population = selectedCountry["population"];
 				language = getLanguage(selectedCountry["languages"].substr(0, 2));
-
 				showModal();
 				$("#generalContainer").empty();
-
 				$("#generalModalLabel").text(countryFullName);
 				$("#flag").attr(
 					"src",
 					"http://www.geonames.org/flags/x/" + country.toLowerCase() + ".gif"
 				);
 
-				//Starting 2nd january when free api renews delete following 4 lines:
+				//Starting 2nd january when free currency api renews move following into nested ajax call:
 
 				$("#generalContainer").append(
 					`
@@ -345,6 +351,7 @@ const countrySelection = (country) => {
 
 map.on("click", (e) => {
 	latlng = map.mouseEventToLatLng(e.originalEvent);
+	//finds country based on coordinates
 	$.ajax({
 		url: "libs/php/findCountry.php",
 		type: "POST",
@@ -354,16 +361,11 @@ map.on("click", (e) => {
 			long: latlng.lng,
 		},
 		success: (result) => {
-			hasExactLatLng = true;
 			country = result.data.countryCode.toLowerCase();
 			countryFullName = result.data.countryName;
-
-			countryBordersOnMap(country);
-			if (!weatherSelected) {
-				countrySelection(country);
-			}
+			
 			$("#countries-dropdown").val(result.data.countryCode);
-			hasExactLatLng = false;
+			//gets weather forecast for those coordinates if weather forecast is toggled on
 			if (weatherSelected) {
 				$.ajax({
 					url: "libs/php/getWeather.php",
@@ -374,7 +376,7 @@ map.on("click", (e) => {
 						long: latlng.lng,
 					},
 					success: (result) => {
-						console.log(result);
+						
 						showModal();
 						$("#generalContainer").empty();
 						$("#generalModalLabel").empty();
@@ -421,10 +423,10 @@ map.on("click", (e) => {
 									<div class="col-1">
 										<i class="fas fa-broadcast-tower"></i>
 									</div>
-									<div class="col-7">
-										<p>Weather Station Name</p>
+									<div class="col-4 col-md-3">
+										<p>Station Name</p>
 									</div>
-									<div class="col-4">
+									<div class=" d-inline-block col-4 offset-3 col-md-4 offset-md-4 text-truncate">
 										<p>${result.data.name ? result.data.name : "Unavailable"}</p>
 									</div>
 								</div>
@@ -433,10 +435,10 @@ map.on("click", (e) => {
 									<div class="col-1">
 										<i class="fas fa-cloud-sun"></i>
 									</div>
-									<div class="col-2">
+									<div class="col-4 col-md-2">
 										<p>Description</p>
 									</div>
-									<div class="col-4 offset-5">
+									<div class="col-4 offset-3 col-md-4 offset-md-5">
 										<p>${result.data.weather[0].description}</p>
 									</div>
 								</div>
@@ -445,10 +447,10 @@ map.on("click", (e) => {
 									<div class="col-1">
 										<i class="fas fa-temperature-high"></i>
 									</div>
-									<div class="col-2">
+									<div class="col-4 col-md-2">
 										<p>Temperature</p>
 									</div>
-									<div class="col-4 offset-5">
+									<div class="col-4 offset-3 col-md-4 offset-md-5">
 										<p>${(result.data.main.temp - 273).toFixed(1)}&deg;</p>
 									</div>
 								</div>
@@ -457,10 +459,10 @@ map.on("click", (e) => {
 									<div class="col-1">
 										<i class="fas fa-umbrella"></i>
 									</div>
-									<div class="col-2">
+									<div class="col-4 col-md-2">
 										<p>Humidity</p>
 									</div>
-									<div class="col-4 offset-5">
+									<div class="col-4 offset-3 col-md-4 offset-md-5">
 										<p>${result.data.main.humidity}%</p>
 									</div>
 								</div>
@@ -469,10 +471,10 @@ map.on("click", (e) => {
 									<div class="col-1">
 										<i class="fas fa-wind"></i>
 									</div>
-									<div class="col-2">
+									<div class="col-4 col-md-2">
 										<p>Wind Speed</p>
 									</div>
-									<div class="col-4 offset-5">
+									<div class="col-4 offset-3 col-md-4 offset-md-5">
 										<p>${result.data.wind.speed} kn</p>
 									</div>
 								</div>
@@ -484,7 +486,7 @@ map.on("click", (e) => {
 					},
 				});
 			} else {
-				countrySelection(country);
+				countryBordersOnMap(country);
 			}
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
@@ -506,6 +508,7 @@ const getCountryNews = (country) => {
 		success: (result) => {
 			showModal();
 			if (result.data.totalResults === 0 || result.data.status === "error") {
+				
 				$("#generalContainer").empty();
 				$("#generalModalLabel").text(`${countryFullName} headlines:`);
 				$("#flag").attr(
@@ -529,32 +532,32 @@ const getCountryNews = (country) => {
 								".gif"
 						);
 						$("#generalContainer").append(`
-				<div class="row" style="background-color:${
-					altRowColor ? lightRowColor : darkRowColor
-				}">
-					<div class="col-2 newsImageDiv"><img class="img-fluid newsimg"  src="${
-						story.image_url
-					}"></img></div>
-					<div class="col-10"><a href="${
-						story.link
-					}" class="newsrow"><div class="text-truncate newstext">${
-							story.title
-						}</div></a></div
-				</div>
-				`);
+														<div class="row" style="background-color:${
+															altRowColor ? lightRowColor : darkRowColor
+														}">
+															<div class="col-2 newsImageDiv"><img class="img-fluid newsimg"  src="${
+																story.image_url
+															}"></img></div>
+															<div class="col-10"><a href="${
+																story.link
+															}" class="newsrow"><div class="text-truncate newstext">${
+																	story.title
+																}</div></a></div
+														</div>
+														`);
 					} else {
 						$("#generalModalLabel").text(`${countryFullName} headlines:`);
 						$("#generalContainer").append(`
-				<div class="row" style="background-color:${
-					altRowColor ? lightRowColor : darkRowColor
-				}">
-					<div class="col-12"><a href="${
-						story.link
-					}" class="newsrow"><div class="text-truncate newstext">${
-							story.title
-						}</div></a></div>
-				</div>
-				`);
+														<div class="row" style="background-color:${
+															altRowColor ? lightRowColor : darkRowColor
+														}">
+															<div class="col-12"><a href="${
+																story.link
+															}" class="newsrow"><div class="text-truncate newstext">${
+																	story.title
+																}</div></a></div>
+														</div>
+														`);
 					}
 					altRowColor = !altRowColor;
 				});
@@ -590,48 +593,43 @@ const getCities = (country) => {
 					$("#citiesModal").modal("show");
 					$("#citiesModalLabel").html(city.name);
 					$("#citiesContainer").append(`
-					
-						
+													<div class="row" style="background-color:${darkRowColor}">
+														<div class="col-1 col-md-1">
+															<i class="fas fa-hamburger"></i>
+														</div>
+														<div class="col-6 col-md-4">
+															<p>Top Restaurants</p>
+														</div>
+														<div class="col-3 offset-2  col-md-1 offset-md-5">
+														<button id=${city.id} type="button" class="btn btn-primary restaurants-btn">View</button>
+														</div>
+													</div>
 
-						<div class="row" style="background-color:${darkRowColor}">
-									<div class="col-1">
-										<i class="fas fa-hamburger"></i>
-									</div>
-									<div class="col-4">
-										<p>Top Restaurants</p>
-									</div>
-									<div class="col-1 offset-5">
-									<button id=${city.id} type="button" class="btn btn-primary restaurants-btn">View</button>
-									</div>
-								</div>
-
-								<div class="row" style="background-color:${lightRowColor}">
-									<div class="col-1">
-										<i class="fas fa-bed"></i>
-									</div>
-									<div class="col-4">
-										<p>Top Hotels</p>
-									</div>
-									<div class="col-1 offset-5">
-									<button id=${city.id} type="button" class="btn btn-primary hotels-btn">View</button>
-									</div>
-								</div>
-								
-								<div class="row" style="background-color:${darkRowColor}">
-									<div class="col-1">
-										<i class="fas fa-music"></i>
-									</div>
-									<div class="col-4">
-										<p>Top Nightlife</p>
-									</div>
-									<div class="col-1 offset-5">
-										<button id=${city.id} type="button" class="btn btn-primary nightlife-btn">View</button>
-									</div>
-								</div>
-
-								
-					
-					`);
+													<div class="row" style="background-color:${lightRowColor}">
+														<div class="col-1 col-md-1">
+															<i class="fas fa-bed"></i>
+														</div>
+														<div class="col-6 col-md-4">
+															<p>Top Hotels</p>
+														</div>
+														<div class="col-3 offset-2 col-md-1 offset-md-5">
+														<button id=${city.id} type="button" class="btn btn-primary hotels-btn">View</button>
+														</div>
+													</div>
+													
+													<div class="row" style="background-color:${darkRowColor}">
+														<div class="col-1 col-md-1">
+															<i class="fas fa-music"></i>
+														</div>
+														<div class="col-6 col-md-4">
+															<p>Top Nightlife</p>
+														</div>
+														<div class="col-3 offset-2 col-md-1 offset-md-5">
+															<button id=${city.id} type="button" class="btn btn-primary nightlife-btn">View</button>
+														</div>
+													</div>
+													`);
+					//zooms in to the city
 					map.setView(
 						[city.coordinates.latitude, city.coordinates.longitude],
 						12
@@ -654,6 +652,8 @@ const getCities = (country) => {
 };
 
 //TOP RESTAURANTS API CALL
+
+//Could condense these easily
 
 $("#citiesContainer").on("click", ".restaurants-btn", (event) => {
 	const cityId = event.target.id;
@@ -749,6 +749,5 @@ $("#citiesContainer").on("click", ".nightlife-btn", (event) => {
 $("#countries-dropdown").on("change", () => {
 	country = $("#countries-dropdown").val();
 	countryFullName = $("#countries-dropdown :selected").text();
-
 	countryBordersOnMap(country);
 });
