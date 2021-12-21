@@ -1,11 +1,10 @@
 <?php
-
 	ini_set('display_errors', 'On');
 	error_reporting(E_ALL);
 
 	$executionStartTime = microtime(true);
 
-    $url='api.openweathermap.org/data/2.5/forecast/daily?lat=' . $_REQUEST['lat'] . '&lon=' . $_REQUEST['long'] . '&appid=29a5011c23ceff6b36fb44403af7983a';
+	$url='https://api.windy.com/api/webcams/v2/list/country=' . $_REQUEST['country'] . '?show=webcams:title,location,player&key=FDJN03uLRPGblHrrmTxqUppwDvDVZnFd';
 
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

@@ -60,7 +60,8 @@ const renderMapWithUserLocation = () => {
 				GeolocationPosition.coords.longitude,
 			];
 
-			//finds user country
+			if (userCoordinates) {
+				//finds user country
 			$.ajax({
 				url: "libs/php/findCountry.php",
 				type: "POST",
@@ -73,6 +74,8 @@ const renderMapWithUserLocation = () => {
 					if (!country) {
 						country = result.data.countryCode.toLowerCase();
 						countryFullName = result.data.countryName;
+						$("#countries-dropdown").val(result.data.countryCode);
+						countryBordersOnMap(country);
 					} else {
 						return;
 					}
@@ -81,15 +84,10 @@ const renderMapWithUserLocation = () => {
 					console.log(textStatus);
 				},
 			});
-			if (userCoordinates) {
-				map.setView(userCoordinates, 15);
-				L.marker(userCoordinates, { icon: userMarker })
-					.addTo(map)
-					.bindPopup("Current Location")
-					.openPopup();
 			} else {
-				map.setView([53.8, 1.54], 13);
+				map.setView([53.8008, 1.5491], 13);
 			}
+
 		});
 	}
 };
@@ -145,6 +143,13 @@ var cityMarkerIcon = L.ExtraMarkers.icon({
 	prefix: "fa",
 });
 
+var webcamMarker = L.ExtraMarkers.icon({
+	icon: "fa-camera",
+	markerColor: "orange",
+	shape: "square",
+	prefix: "fa",
+});
+
 //SHOW MODAL
 
 const showModal = () => {
@@ -162,13 +167,11 @@ const showModal = () => {
 
 L.easyButton("fa-globe", (btn, map) => {
 	countryBordersOnMap(country);
-	showModal();
 	countrySelection(country);
 }).addTo(map);
 
 L.easyButton("fa-newspaper", (btn, map) => {
 	countryBordersOnMap(country);
-	showModal();
 	getCountryNews(country);
 }).addTo(map);
 
@@ -188,11 +191,47 @@ L.easyButton("fa-cloud-sun", (btn, map) => {
 }).addTo(map);
 
 L.easyButton("fa-city", (btn, map) => {
-	$("#generalContainer").empty();
 	countryBordersOnMap(country);
-
 	getCities(country);
 }).addTo(map);
+
+L.easyButton("fa-camera", (btn, map) => {
+	getWebcams(country)
+}).addTo(map);
+
+//WEBCAM API CALL
+
+const getWebcams = (country) => {
+	$.ajax({
+		url: "libs/php/windyWebcams.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			country: country.toUpperCase(),
+		},
+		success: (result) => {
+			if (result.status.name == "ok") {
+				console.log(result)
+				var webcams = result.data.result.webcams
+				webcams.forEach((webcam) => {
+					L.marker(
+						[webcam.location.latitude, webcam.location.longitude],
+						{ icon: webcamMarker }
+					)
+						.addTo(map)
+						.bindPopup(`<h5>${webcam.title}<h5>
+						<div class="embed-responsive embed-responsive-16by9">
+						<iframe class="embed-responsive-item" src="${webcam.player.day.embed}" allowfullscreen></iframe>
+					  </div>
+									`);
+				})
+			}
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(textStatus);
+		},
+	});
+}
 
 //DISPLAY COUNTRY BORDERS ON MAP
 
@@ -247,7 +286,7 @@ const countrySelection = (country) => {
 				var selectedCountry = result.data[0];
 				currencyCode = selectedCountry["currencyCode"];
 				capital = selectedCountry["capital"];
-				population = selectedCountry["population"];
+				population = numeral(selectedCountry["population"]).format('0,0');
 				language = getLanguage(selectedCountry["languages"].substr(0, 2));
 				showModal();
 				$("#generalContainer").empty();
@@ -382,6 +421,7 @@ map.on("click", (e) => {
 						long: latlng.lng,
 					},
 					success: (result) => {
+						console.log(result)
 						showModal();
 						$("#generalContainer").empty();
 						$("#generalModalLabel").empty();
