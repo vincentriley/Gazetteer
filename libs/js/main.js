@@ -1,3 +1,9 @@
+$(document).ready(function() {
+    $("#loading").fadeOut(function() {
+        
+    });
+});
+
 //GLOBALS
 var latlng = null;
 var country = null;
@@ -34,7 +40,7 @@ $.ajax({
 });
 
 // RENDERS MAP
-var map = L.map("map").setView([53.8, 1.54], 13);
+var map = L.map("map", { tap: false }).setView([53.8, 1.54], 13);
 
 var OpenStreetMap_Mapnik = L.tileLayer(
 	"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -363,7 +369,7 @@ map.on("click", (e) => {
 		success: (result) => {
 			country = result.data.countryCode.toLowerCase();
 			countryFullName = result.data.countryName;
-			
+
 			$("#countries-dropdown").val(result.data.countryCode);
 			//gets weather forecast for those coordinates if weather forecast is toggled on
 			if (weatherSelected) {
@@ -376,7 +382,6 @@ map.on("click", (e) => {
 						long: latlng.lng,
 					},
 					success: (result) => {
-						
 						showModal();
 						$("#generalContainer").empty();
 						$("#generalModalLabel").empty();
@@ -426,7 +431,7 @@ map.on("click", (e) => {
 									<div class="col-4 col-md-3">
 										<p>Station Name</p>
 									</div>
-									<div class=" d-inline-block col-4 offset-3 col-md-4 offset-md-4 text-truncate">
+									<div class="col-4 offset-3 col-md-4 offset-md-5 text-truncate">
 										<p>${result.data.name ? result.data.name : "Unavailable"}</p>
 									</div>
 								</div>
@@ -508,7 +513,6 @@ const getCountryNews = (country) => {
 		success: (result) => {
 			showModal();
 			if (result.data.totalResults === 0 || result.data.status === "error") {
-				
 				$("#generalContainer").empty();
 				$("#generalModalLabel").text(`${countryFullName} headlines:`);
 				$("#flag").attr(
@@ -541,8 +545,8 @@ const getCountryNews = (country) => {
 															<div class="col-10"><a href="${
 																story.link
 															}" class="newsrow"><div class="text-truncate newstext">${
-																	story.title
-																}</div></a></div
+							story.title
+						}</div></a></div
 														</div>
 														`);
 					} else {
@@ -554,8 +558,8 @@ const getCountryNews = (country) => {
 															<div class="col-12"><a href="${
 																story.link
 															}" class="newsrow"><div class="text-truncate newstext">${
-																	story.title
-																}</div></a></div>
+							story.title
+						}</div></a></div>
 														</div>
 														`);
 					}
