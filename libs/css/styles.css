@@ -88,6 +88,10 @@ h5 {
 	background-color: #001883;
 }
 
+#citiesModalLabel {
+	color: white;
+}
+
 .btn-primary {
 	font-size: 0.5em;
 	color: white;
@@ -104,6 +108,10 @@ h5 {
 
 .newsImageDiv {
 	padding: 0;
+}
+
+.mainWeatherRow {
+	height: 7rem;
 }
 
 #loading {

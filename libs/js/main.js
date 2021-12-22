@@ -175,12 +175,17 @@ L.easyButton("fa-newspaper", (btn, map) => {
 	getCountryNews(country);
 }).addTo(map);
 
+L.easyButton("fa-virus", (btn, map) => {
+	countryBordersOnMap(country);
+	getCovidStats(country);
+}).addTo(map);
+
 L.easyButton("fa-cloud-sun", (btn, map) => {
 	weatherSelected = !weatherSelected;
 	if (!weatherAlertHasFired) {
-		alert(
+		/*alert(
 			"Please click on points on the map for the most recent weather forecast! To return to country data selection please click the weather button again!"
-		);
+		);*/
 		weatherAlertHasFired = true;
 	}
 	if (weatherSelected) {
@@ -198,6 +203,27 @@ L.easyButton("fa-city", (btn, map) => {
 L.easyButton("fa-camera", (btn, map) => {
 	getWebcams(country)
 }).addTo(map);
+
+//COVID API CALL
+
+const getCovidStats = (country) => {
+	$.ajax({
+		url: "libs/php/covidStats.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			country: country.toUpperCase(),
+		},
+		success: (result) => {
+			if (result.status.name == "ok") {
+				
+			}
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(textStatus);
+		},
+	});
+}
 
 //WEBCAM API CALL
 
@@ -421,7 +447,11 @@ map.on("click", (e) => {
 						long: latlng.lng,
 					},
 					success: (result) => {
-						console.log(result)
+						const forecast = result.data.daily;
+						
+						console.log(forecast)
+						
+						
 						showModal();
 						$("#generalContainer").empty();
 						$("#generalModalLabel").empty();
@@ -431,24 +461,27 @@ map.on("click", (e) => {
 								country.toLowerCase() +
 								".gif"
 						);
-						$("#generalModalLabel").text(`${countryFullName} Local Weather`);
-						if (result.data.weather[0].description === "overcast clouds") {
+						$("#generalModalLabel").text(`${countryFullName.toUpperCase()} WEATHER`);
+						if (forecast[0].weather[0].main === "Rain" || forecast[0].weather[0].main ==="Drizzle") {
 							$("#generalModalHeader").css(
 								"background-image",
 								"url(" + "./libs/img/overcastClouds.jpg" + ")"
 							);
 							$("#generalModalHeader").css("color", "white");
-						} else if (
-							result.data.weather[0].description === "few clouds" ||
-							result.data.weather[0].description === "scattered clouds" ||
-							result.data.weather[0].description === "broken clouds"
-						) {
+						} else if (forecast[0].weather[0].main === "Clear"){
 							$("#generalModalHeader").css(
 								"background-image",
-								"url(" + "./libs/img/lightClouds.jpg" + ")"
+								"url(" + "./libs/img/sun.jpg" + ")"
 							);
-							$("#generalModalHeader").css("color", "black");
-						} else if (result.data.weather[0].description.includes("snow")) {
+							$("#generalModalHeader").css("color", "white");
+						} 
+						else if (forecast[0].weather[0].main === "ThunderStorm" ) {
+							$("#generalModalHeader").css(
+								"background-image",
+								"url(" + "./libs/img/thunder.jpg" + ")"
+							);
+							$("#generalModalHeader").css("color", "white");
+						} else if (forecast[0].weather[0].main === "Snow") {
 							$("#generalModalHeader").css(
 								"background-image",
 								"url(" + "./libs/img/snow.jpg" + ")"
@@ -457,77 +490,101 @@ map.on("click", (e) => {
 						} else {
 							$("#generalModalHeader").css(
 								"background-image",
-								"url(" + "./libs/img/sun.jpg" + ")"
+								"url(" + "./libs/img/lightClouds.jpg" + ")"
 							);
-							$("#generalModalHeader").css("color", "white");
+							$("#generalModalHeader").css("color", "black");
 						}
+						const getWeatherIcon = (overview) => {
+							if (overview === "Thunderstorm") {
+								return "fas fa-bolt"
+							} else if (overview === "Drizzle" || overview === "Rain") {
+								return "fas fa-cloud-showers-heavy"
+							} else if (overview === "Snow") {
+								return "fas fa-snowflake"
+							} else if (overview === "Clear") {
+								return "fas fa-sun"
+							} else {
+								return "fas fa-cloud"
+							}
+						}
+						const todayForecast = getWeatherIcon(forecast[0].weather[0].main)
+						const todayPlusOne =  getWeatherIcon(forecast[1].weather[0].main)
+						const todayPlusTwo =  getWeatherIcon(forecast[2].weather[0].main)
+						const todayPlusThree =  getWeatherIcon(forecast[3].weather[0].main)
+						var today = new Date()
+						var todayDatePlusOne = today.setDate(today.getDate() + 1)
+						var todayDatePlusTwo = today.setDate(today.getDate() + 1)
+						var todayDatePlusThree = today.setDate(today.getDate() + 1)
+						
+						console.log($.format.date(todayDatePlusOne + 1, "MMM d"))
 						$("#generalContainer").append(`
 					
-
-								<div class="row" style="background-color:${darkRowColor}">
-									<div class="col-1">
-										<i class="fas fa-broadcast-tower"></i>
+								<div class="row mainWeatherRow">
+									<div class="col-3">
+										<i class="${todayForecast} fa-5x"></i>
 									</div>
-									<div class="col-4 col-md-3">
-										<p>Station Name</p>
+									<div class="col-3">
+										<p>${(forecast[0].temp.max - 273).toFixed(0)}&deg;</p>
 									</div>
-									<div class="col-4 offset-3 col-md-4 offset-md-5 text-truncate">
-										<p>${result.data.name ? result.data.name : "Unavailable"}</p>
+									<div class="col-3">
+										<p>${(forecast[0].temp.min - 273).toFixed(0)}&deg;</p>
 									</div>
-								</div>
-
-								<div class="row" style="background-color:${lightRowColor}">
-									<div class="col-1">
-										<i class="fas fa-cloud-sun"></i>
-									</div>
-									<div class="col-4 col-md-2">
-										<p>Description</p>
-									</div>
-									<div class="col-4 offset-3 col-md-4 offset-md-5">
-										<p>${result.data.weather[0].description}</p>
+									<div class="col-3">
+										<p>${forecast[0].weather[0].description}</p>
 									</div>
 								</div>
 
-								<div class="row" style="background-color:${darkRowColor}">
+								<div class="row" ">
 									<div class="col-1">
-										<i class="fas fa-temperature-high"></i>
+										<i class="${todayPlusOne}"></i>
 									</div>
-									<div class="col-4 col-md-2">
-										<p>Temperature</p>
+									<div class="col-1">
+										<p>${(forecast[1].temp.max - 273).toFixed(0)}&deg;</p>
 									</div>
-									<div class="col-4 offset-3 col-md-4 offset-md-5">
-										<p>${(result.data.main.temp - 273).toFixed(1)}&deg;</p>
+									<div class="col-1">
+										<p>${(forecast[1].temp.min - 273).toFixed(0)}&deg;</p>
+									</div>
+									<div class="col-4"
+										<p>${$.format.date(todayDatePlusOne + 1, "MMM d")}</p>
 									</div>
 								</div>
+
+								<div class="row" ">
+									<div class="col-1">
+										<i class="${todayPlusTwo}"></i>
+									</div>
+									<div class="col-1">
+										<p>${(forecast[2].temp.max - 273).toFixed(0)}&deg;</p>
+									</div>
+									<div class="col-1">
+										<p>${(forecast[2].temp.min - 273).toFixed(0)}&deg;</p>
+									</div>
+									<div class="col-4"
+										<p>${$.format.date(todayDatePlusTwo + 1, "MMM d")}</p>
+									</div>
+								</div>
+
+								<div class="row" ">
+									<div class="col-1">
+										<i class="${todayPlusThree}"></i>
+									</div>
+									<div class="col-1">
+										<p>${(forecast[3].temp.max - 273).toFixed(0)}&deg;</p>
+									</div>
+									<div class="col-1">
+										<p>${(forecast[3].temp.min - 273).toFixed(0)}&deg;</p>
+									</div>
+									<div class="col-4"
+										<p>${$.format.date(todayDatePlusThree + 1, "MMM d")}</p>
+									</div>
+								</div>
+
 								
-								<div class="row" style="background-color:${lightRowColor}">
-									<div class="col-1">
-										<i class="fas fa-umbrella"></i>
-									</div>
-									<div class="col-4 col-md-2">
-										<p>Humidity</p>
-									</div>
-									<div class="col-4 offset-3 col-md-4 offset-md-5">
-										<p>${result.data.main.humidity}%</p>
-									</div>
-								</div>
-
-								<div class="row" style="background-color:${darkRowColor}">
-									<div class="col-1">
-										<i class="fas fa-wind"></i>
-									</div>
-									<div class="col-4 col-md-2">
-										<p>Wind Speed</p>
-									</div>
-									<div class="col-4 offset-3 col-md-4 offset-md-5">
-										<p>${result.data.wind.speed} kn</p>
-									</div>
-								</div>
 
 					`);
 					},
 					error: (jqXHR, textStatus, errorThrown) => {
-						console.log(errorThrown);
+						console.log(jqXHR);
 					},
 				});
 			} else {
@@ -678,6 +735,33 @@ const getCities = (country) => {
 						[city.coordinates.latitude, city.coordinates.longitude],
 						12
 					);
+					$.ajax({
+						url: "libs/php/cityImages.php",
+						type: "POST",
+						dataType: "json",
+						data: {
+							city: city.name.toLowerCase()
+						},
+						success: (result) => {
+							if (result.status.name == "ok") {
+								console.log(result)
+								var cityImageUrl = result.data.photos[0].image.web;
+								if (cityImageUrl) {
+									$("#cityModalHeader").css({
+										"background-image": `linear-gradient(
+											rgba(0, 0, 0, 0.5),
+											rgba(0, 0, 0, 0.5)
+										  ),url("${cityImageUrl}")`,
+										"background-size": "cover"
+									});
+									
+								}
+							}
+						},
+						error: (jqXHR, textStatus, errorThrown) => {
+							console.log(textStatus);
+						},
+					});
 				};
 				var cityMarker = new L.Marker(
 					[city.coordinates.latitude, city.coordinates.longitude],

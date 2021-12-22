@@ -5,8 +5,8 @@
 
 	$executionStartTime = microtime(true);
 
-	$url='https://api.openweathermap.org/data/2.5/onecall?lat=' . $_REQUEST['lat'] . '&lon=' . $_REQUEST['long'] .  '&exclude=current,minutely,hourly,alerts&appid=78900644066cc29b8f475ae012e2250e';
-	
+    $url='https://api.teleport.org/api/urban_areas/slug:' . $_REQUEST['city'] . '/images' . '/';
+
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
