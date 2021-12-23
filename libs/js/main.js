@@ -1,7 +1,5 @@
-$(document).ready(function() {
-    $("#loading").fadeOut(function() {
-        
-    });
+$(document).ready(function () {
+	$("#loading").fadeOut(function () {});
 });
 
 //GLOBALS
@@ -62,32 +60,31 @@ const renderMapWithUserLocation = () => {
 
 			if (userCoordinates) {
 				//finds user country
-			$.ajax({
-				url: "libs/php/findCountry.php",
-				type: "POST",
-				dataType: "json",
-				data: {
-					lat: userCoordinates[0],
-					long: userCoordinates[1],
-				},
-				success: (result) => {
-					if (!country) {
-						country = result.data.countryCode.toLowerCase();
-						countryFullName = result.data.countryName;
-						$("#countries-dropdown").val(result.data.countryCode);
-						countryBordersOnMap(country);
-					} else {
-						return;
-					}
-				},
-				error: (jqXHR, textStatus, errorThrown) => {
-					console.log(textStatus);
-				},
-			});
+				$.ajax({
+					url: "libs/php/findCountry.php",
+					type: "POST",
+					dataType: "json",
+					data: {
+						lat: userCoordinates[0],
+						long: userCoordinates[1],
+					},
+					success: (result) => {
+						if (!country) {
+							country = result.data.countryCode.toLowerCase();
+							countryFullName = result.data.countryName;
+							$("#countries-dropdown").val(result.data.countryCode);
+							countryBordersOnMap(country);
+						} else {
+							return;
+						}
+					},
+					error: (jqXHR, textStatus, errorThrown) => {
+						console.log(textStatus);
+					},
+				});
 			} else {
 				map.setView([53.8008, 1.5491], 13);
 			}
-
 		});
 	}
 };
@@ -201,8 +198,10 @@ L.easyButton("fa-city", (btn, map) => {
 }).addTo(map);
 
 L.easyButton("fa-camera", (btn, map) => {
-	getWebcams(country)
+	getWebcams(country);
 }).addTo(map);
+
+
 
 //COVID API CALL
 
@@ -212,22 +211,85 @@ const getCovidStats = (country) => {
 		type: "POST",
 		dataType: "json",
 		data: {
-			country: country.toUpperCase(),
+			country: country,
 		},
 		success: (result) => {
 			if (result.status.name == "ok") {
-				
+				const data = result.data.data;
+				console.log(result);
+				showModal();
+				$("#generalContainer").empty();
+				$("#generalModalLabel").text(
+					`${countryFullName.toUpperCase()} COVID STATISTICS`
+				);
+				$("#flag").attr(
+					"src",
+					"http://www.geonames.org/flags/x/" + country.toLowerCase() + ".gif"
+				);
+
+				$("#generalContainer").append(
+					`
+								<div class="row" style="background-color:${darkRowColor}">
+									<div class="col-1">
+										<i class="fas fa-lungs"></i>
+									</div>
+									<div class="col-5">
+										<p>New Cases</p>
+									</div>
+									<div class="col-2 offset-4">
+										<p>${numeral(data.timeline[0].new_confirmed).format("0,0")}</p>
+									</div>
+								</div>
+
+								<div class="row" style="background-color:${lightRowColor}">
+									<div class="col-1">
+										<i class="fas fa-skull"></i>
+									</div>
+									<div class="col-5">
+										<p>New Deaths</p>
+									</div>
+									<div class="col-2 offset-4">
+										<p>${data.timeline[0].new_deaths}</p>
+									</div>
+								</div>
+								
+								<div class="row" style="background-color:${darkRowColor}">
+									<div class="col-1">
+										<i class="fas fa-lungs"></i>
+									</div>
+									<div class="col-5">
+										<p>Total Cases</p>
+									</div>
+									<div class="col-2 offset-4">
+										<p>${numeral(data.latest_data.confirmed).format("0,0")}</p>
+									</div>
+								</div>
+
+								<div class="row" style="background-color:${lightRowColor}">
+									<div class="col-1">
+										<i class="fas fa-skull"></i>
+									</div>
+									<div class="col-5">
+										<p>Total Deaths</p>
+									</div>
+									<div class="col-2 offset-4">
+										<p>${numeral(data.latest_data.deaths).format("0,0")}</p>
+									</div>
+								</div>
+								`
+				);
 			}
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
 			console.log(textStatus);
 		},
 	});
-}
+};
 
 //WEBCAM API CALL
 
 const getWebcams = (country) => {
+	map.removeLayer(citiesMarkers);
 	$.ajax({
 		url: "libs/php/windyWebcams.php",
 		type: "POST",
@@ -237,27 +299,24 @@ const getWebcams = (country) => {
 		},
 		success: (result) => {
 			if (result.status.name == "ok") {
-				console.log(result)
-				var webcams = result.data.result.webcams
+				console.log(result);
+				var webcams = result.data.result.webcams;
 				webcams.forEach((webcam) => {
-					L.marker(
-						[webcam.location.latitude, webcam.location.longitude],
-						{ icon: webcamMarker }
-					)
-						.addTo(map)
-						.bindPopup(`<h5>${webcam.title}<h5>
+					L.marker([webcam.location.latitude, webcam.location.longitude], {
+						icon: webcamMarker,
+					}).addTo(map).bindPopup(`<h5>${webcam.title}<h5>
 						<div class="embed-responsive embed-responsive-16by9">
 						<iframe class="embed-responsive-item" src="${webcam.player.day.embed}" allowfullscreen></iframe>
 					  </div>
 									`);
-				})
+				});
 			}
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
 			console.log(textStatus);
 		},
 	});
-}
+};
 
 //DISPLAY COUNTRY BORDERS ON MAP
 
@@ -312,7 +371,7 @@ const countrySelection = (country) => {
 				var selectedCountry = result.data[0];
 				currencyCode = selectedCountry["currencyCode"];
 				capital = selectedCountry["capital"];
-				population = numeral(selectedCountry["population"]).format('0,0');
+				population = numeral(selectedCountry["population"]).format("0,0");
 				language = getLanguage(selectedCountry["languages"].substr(0, 2));
 				showModal();
 				$("#generalContainer").empty();
@@ -448,10 +507,9 @@ map.on("click", (e) => {
 					},
 					success: (result) => {
 						const forecast = result.data.daily;
-						
-						console.log(forecast)
-						
-						
+
+						console.log(forecast);
+
 						showModal();
 						$("#generalContainer").empty();
 						$("#generalModalLabel").empty();
@@ -461,21 +519,25 @@ map.on("click", (e) => {
 								country.toLowerCase() +
 								".gif"
 						);
-						$("#generalModalLabel").text(`${countryFullName.toUpperCase()} WEATHER`);
-						if (forecast[0].weather[0].main === "Rain" || forecast[0].weather[0].main ==="Drizzle") {
+						$("#generalModalLabel").text(
+							`${countryFullName.toUpperCase()} WEATHER`
+						);
+						if (
+							forecast[0].weather[0].main === "Rain" ||
+							forecast[0].weather[0].main === "Drizzle"
+						) {
 							$("#generalModalHeader").css(
 								"background-image",
 								"url(" + "./libs/img/overcastClouds.jpg" + ")"
 							);
 							$("#generalModalHeader").css("color", "white");
-						} else if (forecast[0].weather[0].main === "Clear"){
+						} else if (forecast[0].weather[0].main === "Clear") {
 							$("#generalModalHeader").css(
 								"background-image",
 								"url(" + "./libs/img/sun.jpg" + ")"
 							);
 							$("#generalModalHeader").css("color", "white");
-						} 
-						else if (forecast[0].weather[0].main === "ThunderStorm" ) {
+						} else if (forecast[0].weather[0].main === "ThunderStorm") {
 							$("#generalModalHeader").css(
 								"background-image",
 								"url(" + "./libs/img/thunder.jpg" + ")"
@@ -496,27 +558,27 @@ map.on("click", (e) => {
 						}
 						const getWeatherIcon = (overview) => {
 							if (overview === "Thunderstorm") {
-								return "fas fa-bolt"
+								return "fas fa-bolt";
 							} else if (overview === "Drizzle" || overview === "Rain") {
-								return "fas fa-cloud-showers-heavy"
+								return "fas fa-cloud-showers-heavy";
 							} else if (overview === "Snow") {
-								return "fas fa-snowflake"
+								return "fas fa-snowflake";
 							} else if (overview === "Clear") {
-								return "fas fa-sun"
+								return "fas fa-sun";
 							} else {
-								return "fas fa-cloud"
+								return "fas fa-cloud";
 							}
-						}
-						const todayForecast = getWeatherIcon(forecast[0].weather[0].main)
-						const todayPlusOne =  getWeatherIcon(forecast[1].weather[0].main)
-						const todayPlusTwo =  getWeatherIcon(forecast[2].weather[0].main)
-						const todayPlusThree =  getWeatherIcon(forecast[3].weather[0].main)
-						var today = new Date()
-						var todayDatePlusOne = today.setDate(today.getDate() + 1)
-						var todayDatePlusTwo = today.setDate(today.getDate() + 1)
-						var todayDatePlusThree = today.setDate(today.getDate() + 1)
-						
-						console.log($.format.date(todayDatePlusOne + 1, "MMM d"))
+						};
+						const todayForecast = getWeatherIcon(forecast[0].weather[0].main);
+						const todayPlusOne = getWeatherIcon(forecast[1].weather[0].main);
+						const todayPlusTwo = getWeatherIcon(forecast[2].weather[0].main);
+						const todayPlusThree = getWeatherIcon(forecast[3].weather[0].main);
+						var today = new Date();
+						var todayDatePlusOne = today.setDate(today.getDate() + 1);
+						var todayDatePlusTwo = today.setDate(today.getDate() + 1);
+						var todayDatePlusThree = today.setDate(today.getDate() + 1);
+
+						console.log($.format.date(todayDatePlusOne + 1, "MMM d"));
 						$("#generalContainer").append(`
 					
 								<div class="row mainWeatherRow">
@@ -633,32 +695,18 @@ const getCountryNews = (country) => {
 								".gif"
 						);
 						$("#generalContainer").append(`
-														<div class="row" style="background-color:${
-															altRowColor ? lightRowColor : darkRowColor
-														}">
-															<div class="col-2 newsImageDiv"><img class="img-fluid newsimg"  src="${
-																story.image_url
-															}"></img></div>
-															<div class="col-10"><a href="${
-																story.link
-															}" class="newsrow"><div class="text-truncate newstext">${
-							story.title
-						}</div></a></div
-														</div>
-														`);
+							<div class="row" style="background-color:${altRowColor ? lightRowColor : darkRowColor}">
+								<div class="col-2 newsImageDiv"><img class="img-fluid newsimg"  src="${story.image_url}"></img></div>
+								<div class="col-10"><a href="${story.link}" class="newsrow"><div class="text-truncate newstext">${story.title}</div></a></div
+							</div>
+						`);
 					} else {
 						$("#generalModalLabel").text(`${countryFullName} headlines:`);
 						$("#generalContainer").append(`
-														<div class="row" style="background-color:${
-															altRowColor ? lightRowColor : darkRowColor
-														}">
-															<div class="col-12"><a href="${
-																story.link
-															}" class="newsrow"><div class="text-truncate newstext">${
-							story.title
-						}</div></a></div>
-														</div>
-														`);
+							<div class="row" style="background-color:${altRowColor ? lightRowColor : darkRowColor}">
+								<div class="col-12"><a href="${story.link}" class="newsrow"><div class="text-truncate newstext">${story.title}</div></a></div>
+							</div>
+						`);
 					}
 					altRowColor = !altRowColor;
 				});
@@ -691,6 +739,7 @@ const getCities = (country) => {
 			cities.forEach((city) => {
 				const onClick = (e) => {
 					$("#citiesContainer").empty();
+					$("#cityModalHeader").css("background-image", "none");
 					$("#citiesModal").modal("show");
 					$("#citiesModalLabel").html(city.name);
 					$("#citiesContainer").append(`
@@ -740,11 +789,11 @@ const getCities = (country) => {
 						type: "POST",
 						dataType: "json",
 						data: {
-							city: city.name.toLowerCase()
+							city: city.name.toLowerCase(),
 						},
 						success: (result) => {
 							if (result.status.name == "ok") {
-								console.log(result)
+								console.log(result);
 								var cityImageUrl = result.data.photos[0].image.web;
 								if (cityImageUrl) {
 									$("#cityModalHeader").css({
@@ -752,9 +801,8 @@ const getCities = (country) => {
 											rgba(0, 0, 0, 0.5),
 											rgba(0, 0, 0, 0.5)
 										  ),url("${cityImageUrl}")`,
-										"background-size": "cover"
+										"background-size": "cover",
 									});
-									
 								}
 							}
 						},

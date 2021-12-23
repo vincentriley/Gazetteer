@@ -1,13 +1,12 @@
 <?php
 
-	// remove for production
 
 	ini_set('display_errors', 'On');
 	error_reporting(E_ALL);
 
 	$executionStartTime = microtime(true);
 
-	$url='https://api.thebasetrip.com/v3/countries/france';
+	$url='https://corona-api.com/countries/' . $_REQUEST['country'];
 
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -24,7 +23,7 @@
 	$output['status']['name'] = "ok";
 	$output['status']['description'] = "success";
 	$output['status']['returnedIn'] = intval((microtime(true) - $executionStartTime) * 1000) . " ms";
-	$output['data'] = $decode['geonames'];
+	$output['data'] = $decode;
 	
 	header('Content-Type: application/json; charset=UTF-8');
 
