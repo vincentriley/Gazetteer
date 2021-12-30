@@ -1,11 +1,10 @@
 <?php
-
 	ini_set('display_errors', 'On');
 	error_reporting(E_ALL);
 
 	$executionStartTime = microtime(true);
 
-	$url='https://newsdata.io/api/1/news?country=' . $_REQUEST['country'] . '&apikey=pub_260134c2d2e10057d7f2d907a6fde750e4df';
+	$url='https://pixabay.com/api/?key=25039214-75fc8224da3f8f1907e838822&q=' . $_REQUEST['country'] . '+country&image_type=photo&orientation=horizontal';
 
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

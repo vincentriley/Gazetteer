@@ -197,11 +197,62 @@ L.easyButton("fa-city", (btn, map) => {
 	getCities(country);
 }).addTo(map);
 
-L.easyButton("fa-camera", (btn, map) => {
+L.easyButton("fa-video", (btn, map) => {
 	getWebcams(country);
 }).addTo(map);
 
+L.easyButton("fa-camera", (btn, map) => {
+	getCountryImages(countryFullName);
+}).addTo(map);
 
+//HOLIDAYS API CALL
+
+//COUNTRY IMAGES API CALL
+
+const getCountryImages = (countryFullName) => {
+	$.ajax({
+		url: "libs/php/countryImages.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			country: countryFullName,
+		},
+		success: (result) => {
+			if (result.status.name == "ok") {
+				const images = result.data.hits;
+				$(".carousel-inner").empty();
+				$("#imagesContainer").empty();
+				$("#imagesModalLabel").text(`${countryFullName.toUpperCase()} IMAGES`);
+				$("#iFlag").attr(
+					"src",
+					"http://www.geonames.org/flags/x/" + country.toLowerCase() + ".gif"
+				);
+				console.log(result);
+				$("#imagesModal").modal("show");
+				for (let i = 0; i < 10; i++) {
+					if (images[i].webformatURL) {
+						if (i === 0) {
+							$(".carousel-inner").append(`
+						<div class="carousel-item active">
+							<img src="${images[i].webformatURL}" class="d-block w-100" alt="...">
+					  	</div>
+						`);
+						} else {
+							$(".carousel-inner").append(`
+						<div class="carousel-item">
+							<img src="${images[i].webformatURL}" class="d-block w-100" alt="...">
+						</div>
+						`);
+						}
+					}
+				}
+			}
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(textStatus);
+		},
+	});
+};
 
 //COVID API CALL
 
@@ -236,7 +287,7 @@ const getCovidStats = (country) => {
 									<div class="col-5">
 										<p>New Cases</p>
 									</div>
-									<div class="col-2 offset-4">
+									<div class="col-3 offset-3">
 										<p>${numeral(data.timeline[0].new_confirmed).format("0,0")}</p>
 									</div>
 								</div>
@@ -248,7 +299,7 @@ const getCovidStats = (country) => {
 									<div class="col-5">
 										<p>New Deaths</p>
 									</div>
-									<div class="col-2 offset-4">
+									<div class="col-3 offset-3">
 										<p>${data.timeline[0].new_deaths}</p>
 									</div>
 								</div>
@@ -260,7 +311,7 @@ const getCovidStats = (country) => {
 									<div class="col-5">
 										<p>Total Cases</p>
 									</div>
-									<div class="col-2 offset-4">
+									<div class="col-3 offset-3">
 										<p>${numeral(data.latest_data.confirmed).format("0,0")}</p>
 									</div>
 								</div>
@@ -272,7 +323,7 @@ const getCovidStats = (country) => {
 									<div class="col-5">
 										<p>Total Deaths</p>
 									</div>
-									<div class="col-2 offset-4">
+									<div class="col-3 offset-3">
 										<p>${numeral(data.latest_data.deaths).format("0,0")}</p>
 									</div>
 								</div>
@@ -375,7 +426,7 @@ const countrySelection = (country) => {
 				language = getLanguage(selectedCountry["languages"].substr(0, 2));
 				showModal();
 				$("#generalContainer").empty();
-				$("#generalModalLabel").text(countryFullName);
+				$("#generalModalLabel").text(countryFullName.toUpperCase());
 				$("#flag").attr(
 					"src",
 					"http://www.geonames.org/flags/x/" + country.toLowerCase() + ".gif"
@@ -520,7 +571,7 @@ map.on("click", (e) => {
 								".gif"
 						);
 						$("#generalModalLabel").text(
-							`${countryFullName.toUpperCase()} WEATHER`
+							`${countryFullName.toUpperCase()} LOCAL WEATHER`
 						);
 						if (
 							forecast[0].weather[0].main === "Rain" ||
@@ -579,67 +630,100 @@ map.on("click", (e) => {
 						var todayDatePlusThree = today.setDate(today.getDate() + 1);
 
 						console.log($.format.date(todayDatePlusOne + 1, "MMM d"));
+
 						$("#generalContainer").append(`
 					
-								<div class="row mainWeatherRow">
-									<div class="col-3">
+								<div class="row border mainWeatherRow">
+									<div class="col-4 d-flex justify-content-center align-items-center">
 										<i class="${todayForecast} fa-5x"></i>
 									</div>
-									<div class="col-3">
+									<div class="col-1">
+										<div class="row d-flex justify-content-center align-items-center">
 										<p>${(forecast[0].temp.max - 273).toFixed(0)}&deg;</p>
-									</div>
-									<div class="col-3">
+										</div>
+										<div class="row d-flex justify-content-center align-items-center">
 										<p>${(forecast[0].temp.min - 273).toFixed(0)}&deg;</p>
+										</div>
 									</div>
-									<div class="col-3">
+
+									<div class="col-7 d-flex justify-content-center align-items-center">
 										<p>${forecast[0].weather[0].description}</p>
 									</div>
+
 								</div>
 
-								<div class="row" ">
-									<div class="col-1">
-										<i class="${todayPlusOne}"></i>
+								<div class="row forecastRow">
+
+									<div class="col-4 border">
+										<div class="row weatherDate">
+											<div class="col-12 d-flex justify-content-center"><p>${$.format.date(
+												todayDatePlusOne,
+												"MMM d"
+											)}</p></div>
+										</div>
+										<div class="row">
+											<div class="col-6 d-flex justify-content-center align-items-center">
+												<i class="${todayPlusOne} fa-2x"></i>
+											</div>
+											<div class="col-6">
+												<div class="row">
+													<div class="col-12"><p>${(forecast[1].temp.max - 273).toFixed(0)}</p></div>
+												</div>
+												<div class="row">
+													<div class="col-12"><p>${(forecast[1].temp.min - 273).toFixed(0)}</p></div>
+												</div>
+											</div>
+										</div>
 									</div>
-									<div class="col-1">
-										<p>${(forecast[1].temp.max - 273).toFixed(0)}&deg;</p>
+
+									<div class="col-4 border">
+										<div class="row weatherDate">
+											<div class="col-12 d-flex justify-content-center "><p>${$.format.date(
+												todayDatePlusTwo,
+												"MMM d"
+											)}</p></div>
+										</div>
+										<div class="row">
+											<div class="col-6 d-flex justify-content-center align-items-center">
+												<i class="${todayPlusTwo} fa-2x"></i>
+											</div>
+											<div class="col-6">
+												<div class="row">
+													<div class="col-12"><p>${(forecast[2].temp.max - 273).toFixed(0)}</p></div>
+												</div>
+												<div class="row">
+													<div class="col-12"><p>${(forecast[2].temp.min - 273).toFixed(0)}</p></div>
+												</div>
+											</div>
+										</div>
 									</div>
-									<div class="col-1">
-										<p>${(forecast[1].temp.min - 273).toFixed(0)}&deg;</p>
+
+									<div class="col-4 border">
+										<div class="row weatherDate">
+											<div class="col-12 d-flex justify-content-center "><p>${$.format.date(
+												todayDatePlusThree,
+												"MMM d"
+											)}</p></div>
+										</div>
+										<div class="row">
+											<div class="col-6 d-flex justify-content-center align-items-center">
+												<i class="${todayPlusThree} fa-2x"></i>
+											</div>
+											<div class="col-6">
+												<div class="row">
+													<div class="col-12"><p>${(forecast[3].temp.max - 273).toFixed(0)}</p></div>
+												</div>
+												<div class="row">
+													<div class="col-12"><p>${(forecast[3].temp.min - 273).toFixed(0)}</p></div>
+												</div>
+											</div>
+										</div>
 									</div>
-									<div class="col-4"
-										<p>${$.format.date(todayDatePlusOne + 1, "MMM d")}</p>
-									</div>
+
+
 								</div>
 
-								<div class="row" ">
-									<div class="col-1">
-										<i class="${todayPlusTwo}"></i>
-									</div>
-									<div class="col-1">
-										<p>${(forecast[2].temp.max - 273).toFixed(0)}&deg;</p>
-									</div>
-									<div class="col-1">
-										<p>${(forecast[2].temp.min - 273).toFixed(0)}&deg;</p>
-									</div>
-									<div class="col-4"
-										<p>${$.format.date(todayDatePlusTwo + 1, "MMM d")}</p>
-									</div>
-								</div>
-
-								<div class="row" ">
-									<div class="col-1">
-										<i class="${todayPlusThree}"></i>
-									</div>
-									<div class="col-1">
-										<p>${(forecast[3].temp.max - 273).toFixed(0)}&deg;</p>
-									</div>
-									<div class="col-1">
-										<p>${(forecast[3].temp.min - 273).toFixed(0)}&deg;</p>
-									</div>
-									<div class="col-4"
-										<p>${$.format.date(todayDatePlusThree + 1, "MMM d")}</p>
-									</div>
-								</div>
+								
 
 								
 
@@ -670,6 +754,7 @@ const getCountryNews = (country) => {
 			country: country,
 		},
 		success: (result) => {
+			console.log("test");
 			showModal();
 			if (result.data.totalResults === 0 || result.data.status === "error") {
 				$("#generalContainer").empty();
@@ -695,16 +780,30 @@ const getCountryNews = (country) => {
 								".gif"
 						);
 						$("#generalContainer").append(`
-							<div class="row" style="background-color:${altRowColor ? lightRowColor : darkRowColor}">
-								<div class="col-2 newsImageDiv"><img class="img-fluid newsimg"  src="${story.image_url}"></img></div>
-								<div class="col-10"><a href="${story.link}" class="newsrow"><div class="text-truncate newstext">${story.title}</div></a></div
+							<div class="row" style="background-color:${
+								altRowColor ? lightRowColor : darkRowColor
+							}">
+								<div class="col-2 newsImageDiv"><img class="img-fluid newsimg"  src="${
+									story.image_url
+								}"></img></div>
+								<div class="col-10"><a href="${
+									story.link
+								}" class="newsrow"><div class="text-truncate newstext">${
+							story.title
+						}</div></a></div
 							</div>
 						`);
 					} else {
 						$("#generalModalLabel").text(`${countryFullName} headlines:`);
 						$("#generalContainer").append(`
-							<div class="row" style="background-color:${altRowColor ? lightRowColor : darkRowColor}">
-								<div class="col-12"><a href="${story.link}" class="newsrow"><div class="text-truncate newstext">${story.title}</div></a></div>
+							<div class="row" style="background-color:${
+								altRowColor ? lightRowColor : darkRowColor
+							}">
+								<div class="col-12"><a href="${
+									story.link
+								}" class="newsrow"><div class="text-truncate newstext">${
+							story.title
+						}</div></a></div>
 							</div>
 						`);
 					}
@@ -845,15 +944,16 @@ $("#citiesContainer").on("click", ".restaurants-btn", (event) => {
 			map.removeLayer(citiesMarkers);
 			var restaurants = result.data.results;
 			$("#citiesModal").modal("hide");
-
+			var restaurantMarkers = L.markerClusterGroup();
 			restaurants.forEach((restaurant) => {
-				L.marker(
-					[restaurant.coordinates.latitude, restaurant.coordinates.longitude],
-					{ icon: restaurantMarker }
-				)
-					.addTo(map)
-					.bindPopup(`<h6>${restaurant.name}</h6><p>${restaurant.intro}</p>`);
+				restaurantMarkers.addLayer(
+					L.marker(
+						[restaurant.coordinates.latitude, restaurant.coordinates.longitude],
+						{ icon: restaurantMarker }
+					).bindPopup(`<h6>${restaurant.name}</h6><p>${restaurant.intro}</p>`)
+				);
 			});
+			map.addLayer(restaurantMarkers);
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
 			console.log(errorThrown);
@@ -877,13 +977,15 @@ $("#citiesContainer").on("click", ".hotels-btn", (event) => {
 			map.removeLayer(citiesMarkers);
 			var hotels = result.data.results;
 			$("#citiesModal").modal("hide");
+			var hotelMarkers = L.markerClusterGroup();
 			hotels.forEach((hotel) => {
-				L.marker([hotel.coordinates.latitude, hotel.coordinates.longitude], {
-					icon: hotelMarker,
-				})
-					.addTo(map)
-					.bindPopup(`<h6>${hotel.name}</h6><p>${hotel.intro}</p>`);
+				hotelMarkers.addLayer(
+					L.marker([hotel.coordinates.latitude, hotel.coordinates.longitude], {
+						icon: hotelMarker,
+					}).bindPopup(`<h6>${hotel.name}</h6><p>${hotel.intro}</p>`)
+				);
 			});
+			map.addLayer(hotelMarkers);
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
 			console.log(errorThrown);
@@ -907,14 +1009,16 @@ $("#citiesContainer").on("click", ".nightlife-btn", (event) => {
 			map.removeLayer(citiesMarkers);
 			var nightlife = result.data.results;
 			$("#citiesModal").modal("hide");
+			var nightlifeMarkers = L.markerClusterGroup();
 			nightlife.forEach((nightlife) => {
-				L.marker(
-					[nightlife.coordinates.latitude, nightlife.coordinates.longitude],
-					{ icon: nightlifeMarker }
-				)
-					.addTo(map)
-					.bindPopup(`<h6>${nightlife.name}</h6><p>${nightlife.intro}</p>`);
+				nightlifeMarkers.addLayer(
+					L.marker(
+						[nightlife.coordinates.latitude, nightlife.coordinates.longitude],
+						{ icon: nightlifeMarker }
+					).bindPopup(`<h6>${nightlife.name}</h6><p>${nightlife.intro}</p>`)
+				);
 			});
+			map.addLayer(nightlifeMarkers);
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
 			console.log(errorThrown);
