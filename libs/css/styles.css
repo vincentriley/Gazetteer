@@ -40,20 +40,32 @@ body {
 	width: auto;
 }
 
-.newsrow {
+.newsRow {
+	text-decoration: none;
+	color: black;
+	height: 5em;
+	text-overflow: ellipsis;
+}
+
+.newsRow a {
 	text-decoration: none;
 	color: black;
 }
 
 .newsimg {
-	height: 2.9em;
+	height: 4em;
+	width: 5em;
+	object-fit: cover;
 }
 
-
-
-.row {
+.generalRow {
 	height: 3em;
-	line-height: 3em;
+	display: flex;
+	align-items: center;
+}
+
+.generalRow p {
+	margin: 0;
 }
 
 .star {
@@ -65,7 +77,9 @@ body {
 	margin-right: auto;
 }
 
-
+#citiesContainer p {
+	margin: 0;
+}
 
 .modal-dialog {
 	margin-bottom: 0;
@@ -73,6 +87,10 @@ body {
 
 .modal-content {
 	border: 0;
+}
+
+.btn {
+	margin: 5px;
 }
 
 .modal-header {
@@ -102,14 +120,15 @@ body {
 	padding: 0;
 }
 
+.weatherDate {
+	height: 1em !important;
+	
+}
+
+
 .mainWeatherRow {
-	height: 9rem;
+	padding: 10px;
 }
-
-.forecastRow {
-	height: 9rem;
-}
-
 
 
 #loading {

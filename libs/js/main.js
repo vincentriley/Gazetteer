@@ -219,7 +219,16 @@ const getCountryImages = (countryFullName) => {
 		},
 		success: (result) => {
 			if (result.status.name == "ok") {
+				console.log(result)
+				if (result.data.total === 0) {
+					$("#noImages").show()
+					$("#carouselExampleControls").hide()
+				} else {
+					$("#noImages").hide()
+				}
 				const images = result.data.hits;
+				
+				$("#carouselExampleControls").show()
 				$(".carousel-inner").empty();
 				$("#imagesContainer").empty();
 				$("#imagesModalLabel").text(`${countryFullName.toUpperCase()} IMAGES`);
@@ -245,6 +254,7 @@ const getCountryImages = (countryFullName) => {
 						`);
 						}
 					}
+				
 				}
 			}
 		},
@@ -280,7 +290,7 @@ const getCovidStats = (country) => {
 
 				$("#generalContainer").append(
 					`
-								<div class="row" style="background-color:${darkRowColor}">
+								<div class="row generalRow" style="background-color:${darkRowColor}">
 									<div class="col-1">
 										<i class="fas fa-lungs"></i>
 									</div>
@@ -292,7 +302,7 @@ const getCovidStats = (country) => {
 									</div>
 								</div>
 
-								<div class="row" style="background-color:${lightRowColor}">
+								<div class="row generalRow" style="background-color:${lightRowColor}">
 									<div class="col-1">
 										<i class="fas fa-skull"></i>
 									</div>
@@ -304,7 +314,7 @@ const getCovidStats = (country) => {
 									</div>
 								</div>
 								
-								<div class="row" style="background-color:${darkRowColor}">
+								<div class="row generalRow" style="background-color:${darkRowColor}">
 									<div class="col-1">
 										<i class="fas fa-lungs"></i>
 									</div>
@@ -316,7 +326,7 @@ const getCovidStats = (country) => {
 									</div>
 								</div>
 
-								<div class="row" style="background-color:${lightRowColor}">
+								<div class="row generalRow" style="background-color:${lightRowColor}">
 									<div class="col-1">
 										<i class="fas fa-skull"></i>
 									</div>
@@ -386,7 +396,16 @@ const countryBordersOnMap = (country) => {
 						map.removeLayer(layer);
 					}
 				});
-				var countryPolygonLayer = L.geoJson(result.data);
+				const polygonStyle = () => {
+					return {
+						color: "blue",
+						weight: 0,
+						fillOpacity: 0.1,
+					};
+				};
+				var countryPolygonLayer = L.geoJson(result.data, {
+					style: polygonStyle,
+				});
 				map.fitBounds(countryPolygonLayer.getBounds());
 				countryPolygonLayer.addTo(map);
 			}
@@ -436,19 +455,19 @@ const countrySelection = (country) => {
 
 				$("#generalContainer").append(
 					`
-								<div class="row" style="background-color:${darkRowColor}">
+								<div class="row generalRow" style="background-color:${darkRowColor}">
 									<div class="col-1">
 										<i class="fas fa-archway"></i>
 									</div>
-									<div class="col-2">
-										<p>Capital</p>
+									<div class="col-2 d-flex align-items-center">
+										<p class="generalP">Capital</p>
 									</div>
 									<div class="col-2 offset-6">
 										<p>${capital}</p>
 									</div>
 								</div>
 
-								<div class="row" style="background-color:${lightRowColor}">
+								<div class="row generalRow" style="background-color:${lightRowColor}">
 									<div class="col-1">
 										<i class="fas fa-user-friends"></i>
 									</div>
@@ -460,7 +479,7 @@ const countrySelection = (country) => {
 									</div>
 								</div>
 								
-								<div class="row" style="background-color:${darkRowColor}">
+								<div class="row generalRow" style="background-color:${darkRowColor}">
 									<div class="col-1">
 										<i class="fas fa-language"></i>
 									</div>
@@ -472,7 +491,7 @@ const countrySelection = (country) => {
 									</div>
 								</div>
 
-								<div class="row" style="background-color:${lightRowColor}">
+								<div class="row generalRow" style="background-color:${lightRowColor}">
 									<div class="col-1">
 										<i class="fas fa-coins"></i>
 									</div>
@@ -637,16 +656,20 @@ map.on("click", (e) => {
 									<div class="col-4 d-flex justify-content-center align-items-center">
 										<i class="${todayForecast} fa-5x"></i>
 									</div>
-									<div class="col-1">
-										<div class="row d-flex justify-content-center align-items-center">
-										<p>${(forecast[0].temp.max - 273).toFixed(0)}&deg;</p>
+									<div class="col-3 flex-column justify-content-end">
+										<div class="row">
+											<div class="col-12">	
+												<p>${(forecast[0].temp.max - 273).toFixed(0)}&deg;</p>
+											</div>	
 										</div>
-										<div class="row d-flex justify-content-center align-items-center">
-										<p>${(forecast[0].temp.min - 273).toFixed(0)}&deg;</p>
+										<div class="row">
+											<div class="col-12">	
+												<p>${(forecast[0].temp.min - 273).toFixed(0)}&deg;</p>
+											</div>
 										</div>
 									</div>
 
-									<div class="col-7 d-flex justify-content-center align-items-center">
+									<div class="col-5 d-flex justify-content-center align-items-center">
 										<p>${forecast[0].weather[0].description}</p>
 									</div>
 
@@ -655,22 +678,22 @@ map.on("click", (e) => {
 								<div class="row forecastRow">
 
 									<div class="col-4 border">
-										<div class="row weatherDate">
-											<div class="col-12 d-flex justify-content-center"><p>${$.format.date(
+										<div class="row weatherDate d-flex justify-content-center" >
+											<p>${$.format.date(
 												todayDatePlusOne,
 												"MMM d"
-											)}</p></div>
+											)}</p>
 										</div>
 										<div class="row">
 											<div class="col-6 d-flex justify-content-center align-items-center">
-												<i class="${todayPlusOne} fa-2x"></i>
+												<i class="${todayPlusOne} fa-3x"></i>
 											</div>
 											<div class="col-6">
 												<div class="row">
-													<div class="col-12"><p>${(forecast[1].temp.max - 273).toFixed(0)}</p></div>
+													<div class="col-12"><p>${(forecast[1].temp.max - 273).toFixed(0)}&deg;</p></div>
 												</div>
 												<div class="row">
-													<div class="col-12"><p>${(forecast[1].temp.min - 273).toFixed(0)}</p></div>
+													<div class="col-12"><p>${(forecast[1].temp.min - 273).toFixed(0)}&deg;</p></div>
 												</div>
 											</div>
 										</div>
@@ -678,21 +701,21 @@ map.on("click", (e) => {
 
 									<div class="col-4 border">
 										<div class="row weatherDate">
-											<div class="col-12 d-flex justify-content-center "><p>${$.format.date(
+											<p>${$.format.date(
 												todayDatePlusTwo,
 												"MMM d"
-											)}</p></div>
+											)}</p>
 										</div>
 										<div class="row">
 											<div class="col-6 d-flex justify-content-center align-items-center">
-												<i class="${todayPlusTwo} fa-2x"></i>
+												<i class="${todayPlusTwo} fa-3x"></i>
 											</div>
 											<div class="col-6">
 												<div class="row">
-													<div class="col-12"><p>${(forecast[2].temp.max - 273).toFixed(0)}</p></div>
+													<div class="col-12"><p>${(forecast[2].temp.max - 273).toFixed(0)}&deg;</p></div>
 												</div>
 												<div class="row">
-													<div class="col-12"><p>${(forecast[2].temp.min - 273).toFixed(0)}</p></div>
+													<div class="col-12"><p>${(forecast[2].temp.min - 273).toFixed(0)}&deg;</p></div>
 												</div>
 											</div>
 										</div>
@@ -700,21 +723,21 @@ map.on("click", (e) => {
 
 									<div class="col-4 border">
 										<div class="row weatherDate">
-											<div class="col-12 d-flex justify-content-center "><p>${$.format.date(
+											<p>${$.format.date(
 												todayDatePlusThree,
 												"MMM d"
-											)}</p></div>
+											)}</p>
 										</div>
 										<div class="row">
 											<div class="col-6 d-flex justify-content-center align-items-center">
-												<i class="${todayPlusThree} fa-2x"></i>
+												<i class="${todayPlusThree} fa-3x"></i>
 											</div>
 											<div class="col-6">
 												<div class="row">
-													<div class="col-12"><p>${(forecast[3].temp.max - 273).toFixed(0)}</p></div>
+													<div class="col-12"><p>${(forecast[3].temp.max - 273).toFixed(0)}&deg;</p></div>
 												</div>
 												<div class="row">
-													<div class="col-12"><p>${(forecast[3].temp.min - 273).toFixed(0)}</p></div>
+													<div class="col-12"><p>${(forecast[3].temp.min - 273).toFixed(0)}&deg;</p></div>
 												</div>
 											</div>
 										</div>
@@ -745,6 +768,8 @@ map.on("click", (e) => {
 
 //NEWS BUTTON API CALL
 
+//prettier-ignore
+
 const getCountryNews = (country) => {
 	$.ajax({
 		url: "libs/php/countryNews.php",
@@ -755,14 +780,15 @@ const getCountryNews = (country) => {
 		},
 		success: (result) => {
 			console.log("test");
-			showModal();
-			if (result.data.totalResults === 0 || result.data.status === "error") {
-				$("#generalContainer").empty();
-				$("#generalModalLabel").text(`${countryFullName} headlines:`);
+			$("#generalContainer").empty();
+				$("#generalModalLabel").text(`${countryFullName.toUpperCase()} HEADLINES`);
 				$("#flag").attr(
 					"src",
 					"http://www.geonames.org/flags/x/" + country.toLowerCase() + ".gif"
 				);
+			showModal();
+			if (result.data.totalResults === 0 || result.data.status === "error") {
+				
 				$("#generalContainer").append(
 					"<p>Sorry no news is currently available for this country."
 				);
@@ -771,42 +797,17 @@ const getCountryNews = (country) => {
 				$("#generalContainer").empty();
 				var altRowColor = false;
 				stories.forEach((story) => {
-					if (story.image_url) {
-						$("#generalModalLabel").text(`${countryFullName} headlines`);
-						$("#flag").attr(
-							"src",
-							"http://www.geonames.org/flags/x/" +
-								country.toLowerCase() +
-								".gif"
-						);
 						$("#generalContainer").append(`
-							<div class="row" style="background-color:${
-								altRowColor ? lightRowColor : darkRowColor
-							}">
-								<div class="col-2 newsImageDiv"><img class="img-fluid newsimg"  src="${
-									story.image_url
-								}"></img></div>
-								<div class="col-10"><a href="${
-									story.link
-								}" class="newsrow"><div class="text-truncate newstext">${
-							story.title
-						}</div></a></div
+							<div class="row newsRow" style="background-color:${altRowColor ? lightRowColor : darkRowColor}">
+								<div class="col-4 d-flex justify-content-center align-items-center newsImageDiv">
+									<img class="img-fluid newsimg"  src="${story.image_url ? story.image_url : "./libs/img/imageNotAvailable.jpg"}">
+								</div>
+								<div class="col-8" style="text-overflow:ellipsis;">
+									<a href="${story.link}"><p class="text-justify">${story.title.slice(0,80)}...</p></a>
+								</div
 							</div>
 						`);
-					} else {
-						$("#generalModalLabel").text(`${countryFullName} headlines:`);
-						$("#generalContainer").append(`
-							<div class="row" style="background-color:${
-								altRowColor ? lightRowColor : darkRowColor
-							}">
-								<div class="col-12"><a href="${
-									story.link
-								}" class="newsrow"><div class="text-truncate newstext">${
-							story.title
-						}</div></a></div>
-							</div>
-						`);
-					}
+					
 					altRowColor = !altRowColor;
 				});
 			}
@@ -832,48 +833,49 @@ const getCities = (country) => {
 		},
 		success: (result) => {
 			var cities = result.data.results;
-
+			citiesMarkers.clearLayers()
 			$("#generalContainer").empty();
 
 			cities.forEach((city) => {
 				const onClick = (e) => {
+					
 					$("#citiesContainer").empty();
 					$("#cityModalHeader").css("background-image", "none");
 					$("#citiesModal").modal("show");
 					$("#citiesModalLabel").html(city.name);
 					$("#citiesContainer").append(`
 													<div class="row" style="background-color:${darkRowColor}">
-														<div class="col-1 col-md-1">
+														<div class="col-1 col-md-1 d-flex align-items-center">
 															<i class="fas fa-hamburger"></i>
 														</div>
-														<div class="col-6 col-md-4">
+														<div class="col-6 col-md-5 d-flex align-items-center">
 															<p>Top Restaurants</p>
 														</div>
-														<div class="col-3 offset-2  col-md-1 offset-md-5">
-														<button id=${city.id} type="button" class="btn btn-primary restaurants-btn">View</button>
+														<div class="col-3 offset-2  col-md-3 offset-md-3">
+															<button id=${city.id} type="button" class="btn btn-primary restaurants-btn">View</button>
 														</div>
 													</div>
 
 													<div class="row" style="background-color:${lightRowColor}">
-														<div class="col-1 col-md-1">
+														<div class="col-1 col-md-1 d-flex align-items-center">
 															<i class="fas fa-bed"></i>
 														</div>
-														<div class="col-6 col-md-4">
+														<div class="col-6 col-md-5 d-flex align-items-center">
 															<p>Top Hotels</p>
 														</div>
-														<div class="col-3 offset-2 col-md-1 offset-md-5">
+														<div class="col-3 offset-2 col-md-3 offset-md-3">
 														<button id=${city.id} type="button" class="btn btn-primary hotels-btn">View</button>
 														</div>
 													</div>
 													
 													<div class="row" style="background-color:${darkRowColor}">
-														<div class="col-1 col-md-1">
+														<div class="col-1 col-md-1 d-flex align-items-center">
 															<i class="fas fa-music"></i>
 														</div>
-														<div class="col-6 col-md-4">
+														<div class="col-6 col-md-5 d-flex align-items-center">
 															<p>Top Nightlife</p>
 														</div>
-														<div class="col-3 offset-2 col-md-1 offset-md-5">
+														<div class="col-3 offset-2 col-md-3 offset-md-3">
 															<button id=${city.id} type="button" class="btn btn-primary nightlife-btn">View</button>
 														</div>
 													</div>

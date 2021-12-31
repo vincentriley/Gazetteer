@@ -4,7 +4,7 @@
 
 	$executionStartTime = microtime(true);
 
-	$url='https://pixabay.com/api/?key=25039214-75fc8224da3f8f1907e838822&q=' . $_REQUEST['country'] . '+country&image_type=photo&orientation=horizontal';
+	$url='https://pixabay.com/api/?key=25039214-75fc8224da3f8f1907e838822&q=' . $_REQUEST['country'] . '+landscape&image_type=photo&orientation=horizontal';
 
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
