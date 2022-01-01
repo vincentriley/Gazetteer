@@ -215,20 +215,21 @@ const getCountryImages = (countryFullName) => {
 		type: "POST",
 		dataType: "json",
 		data: {
-			country: countryFullName,
+			country: countryFullName.replace(" ", "_"),
 		},
 		success: (result) => {
+			console.log(countryFullName.replace(" ", "_"));
 			if (result.status.name == "ok") {
-				console.log(result)
+				console.log(result);
 				if (result.data.total === 0) {
-					$("#noImages").show()
-					$("#carouselExampleControls").hide()
+					$("#noImages").show();
+					$("#carouselExampleControls").hide();
 				} else {
-					$("#noImages").hide()
+					$("#noImages").hide();
 				}
 				const images = result.data.hits;
-				
-				$("#carouselExampleControls").show()
+
+				$("#carouselExampleControls").show();
 				$(".carousel-inner").empty();
 				$("#imagesContainer").empty();
 				$("#imagesModalLabel").text(`${countryFullName.toUpperCase()} IMAGES`);
@@ -254,7 +255,6 @@ const getCountryImages = (countryFullName) => {
 						`);
 						}
 					}
-				
 				}
 			}
 		},
@@ -651,20 +651,24 @@ map.on("click", (e) => {
 						console.log($.format.date(todayDatePlusOne + 1, "MMM d"));
 
 						$("#generalContainer").append(`
-					
-								<div class="row border mainWeatherRow">
+								<div class="row" style="background-color:${darkRowColor};">
+									<div class="col-12 d-flex justify-content-center">
+										<p>Today's weather</p>
+									</div>
+								</div>
+								<div class="row mainWeatherRow" style="background-color:${darkRowColor};">
 									<div class="col-4 d-flex justify-content-center align-items-center">
 										<i class="${todayForecast} fa-5x"></i>
 									</div>
 									<div class="col-3 flex-column justify-content-end">
 										<div class="row">
 											<div class="col-12">	
-												<p>${(forecast[0].temp.max - 273).toFixed(0)}&deg;</p>
+												<p>High: ${(forecast[0].temp.max - 273).toFixed(0)}&deg;</p>
 											</div>	
 										</div>
 										<div class="row">
 											<div class="col-12">	
-												<p>${(forecast[0].temp.min - 273).toFixed(0)}&deg;</p>
+												<p>Low: ${(forecast[0].temp.min - 273).toFixed(0)}&deg;</p>
 											</div>
 										</div>
 									</div>
@@ -675,14 +679,11 @@ map.on("click", (e) => {
 
 								</div>
 
-								<div class="row forecastRow">
+								<div class="row forecastRow" style="background-color:${darkRowColor};">
 
 									<div class="col-4 border">
 										<div class="row weatherDate d-flex justify-content-center" >
-											<p>${$.format.date(
-												todayDatePlusOne,
-												"MMM d"
-											)}</p>
+											<p>${$.format.date(todayDatePlusOne, "MMM d")}</p>
 										</div>
 										<div class="row">
 											<div class="col-6 d-flex justify-content-center align-items-center">
@@ -701,10 +702,7 @@ map.on("click", (e) => {
 
 									<div class="col-4 border">
 										<div class="row weatherDate">
-											<p>${$.format.date(
-												todayDatePlusTwo,
-												"MMM d"
-											)}</p>
+											<p>${$.format.date(todayDatePlusTwo, "MMM d")}</p>
 										</div>
 										<div class="row">
 											<div class="col-6 d-flex justify-content-center align-items-center">
@@ -723,10 +721,7 @@ map.on("click", (e) => {
 
 									<div class="col-4 border">
 										<div class="row weatherDate">
-											<p>${$.format.date(
-												todayDatePlusThree,
-												"MMM d"
-											)}</p>
+											<p>${$.format.date(todayDatePlusThree, "MMM d")}</p>
 										</div>
 										<div class="row">
 											<div class="col-6 d-flex justify-content-center align-items-center">
@@ -833,12 +828,11 @@ const getCities = (country) => {
 		},
 		success: (result) => {
 			var cities = result.data.results;
-			citiesMarkers.clearLayers()
+			citiesMarkers.clearLayers();
 			$("#generalContainer").empty();
 
 			cities.forEach((city) => {
 				const onClick = (e) => {
-					
 					$("#citiesContainer").empty();
 					$("#cityModalHeader").css("background-image", "none");
 					$("#citiesModal").modal("show");
