@@ -12,6 +12,7 @@ const lightRowColor = "#ffffff";
 const darkRowColor = "#bbc7fb49";
 var userCoordinates = null;
 
+
 //POPULATES DROPDOWN LIST
 $.ajax({
 	url: "libs/php/countryNames.php",
@@ -181,12 +182,11 @@ L.easyButton("fa-virus", (btn, map) => {
 	getCovidStats(country);
 }).addTo(map);
 
+
 L.easyButton("fa-cloud-sun", (btn, map) => {
 	weatherSelected = !weatherSelected;
 	if (!weatherAlertHasFired) {
-		/*alert(
-			"Please click on points on the map for the most recent weather forecast! To return to country data selection please click the weather button again!"
-		);*/
+		$("#weatherAlertModal").modal("show");
 		weatherAlertHasFired = true;
 	}
 	if (weatherSelected) {
@@ -194,7 +194,7 @@ L.easyButton("fa-cloud-sun", (btn, map) => {
 	} else {
 		btn.button.style.backgroundColor = null;
 	}
-}).addTo(map);
+},).addTo(map);
 
 L.easyButton("fa-city", (btn, map) => {
 	countryBordersOnMap(country);
