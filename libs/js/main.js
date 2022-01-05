@@ -155,9 +155,13 @@ const showModal = () => {
 	$("#generalModalHeader").css("color", "white");
 	$("#generalContainer").empty();
 	$("#generalModal").modal("show");
-	$("#generalContainer").append(`<div class="spinner-border" role="status">
-	<span class="sr-only">Loading...</span>
-  </div>`);
+	$("#generalContainer").append(`
+	<div class="d-flex justify-content-center">
+		<div class="spinner-border" role="status">
+			<span class="sr-only">Loading...</span>
+    	</div>
+	</div>	
+	`);
 };
 
 //RENDERS EASYBUTTONS
@@ -774,16 +778,17 @@ const getCountryNews = (country) => {
 			country: country,
 		},
 		success: (result) => {
-			console.log("test");
+			console.log(result)
+			showModal();
 			$("#generalContainer").empty();
 				$("#generalModalLabel").text(`${countryFullName.toUpperCase()} HEADLINES`);
 				$("#flag").attr(
 					"src",
 					"http://www.geonames.org/flags/x/" + country.toLowerCase() + ".gif"
 				);
-			showModal();
+			
 			if (result.data.totalResults === 0 || result.data.status === "error") {
-				
+				$("#generalContainer").empty();
 				$("#generalContainer").append(
 					"<p>Sorry no news is currently available for this country."
 				);
