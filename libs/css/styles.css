@@ -16,6 +16,15 @@ body {
 	margin-left: 6%;
 	margin-top: 20px;
 	position: absolute;
+	width:auto;
+}
+
+.navbar {
+	margin-top: 10px;
+}
+
+#weatherAlertModal {
+	top: 40vh;
 }
 
 @media screen and (max-width: 767px) {

@@ -4,18 +4,12 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="icon" type="image/x-icon" href="./libs/img/favicon.ico">
+		<link rel="icon" type="image/x-icon" href="./libs/img/favicon.ico" />
 		<title>Gazetteer</title>
-		<link
-			href="./vendors/css/bootstrap.min.css"
-			rel="stylesheet"
-		/>
-		<link
-			rel="stylesheet"
-			href="./vendors/css/leaflet.css"
-		/>
+		<link href="./vendors/css/bootstrap.min.css" rel="stylesheet" />
+		<link rel="stylesheet" href="./vendors/css/leaflet.css" />
 		<link rel="stylesheet" href="./vendors/css/leaflet.extra-markers.min.css" />
-		<link rel="stylesheet" href="./vendors/css/easy-button.css">
+		<link rel="stylesheet" href="./vendors/css/easy-button.css" />
 		<link
 			href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap"
 			rel="stylesheet"
@@ -24,22 +18,20 @@
 			href="https://fonts.googleapis.com/css2?family=Inter&family=Noto+Sans&family=Nunito+Sans&display=swap"
 			rel="stylesheet"
 		/>
-		<link href="vendors/css/MarkerCluster.css" rel="stylesheet"/>
-		<link href="vendors/css/MarkerCluster.Default.css" rel="stylesheet"/>
+		<link href="vendors/css/MarkerCluster.css" rel="stylesheet" />
+		<link href="vendors/css/MarkerCluster.Default.css" rel="stylesheet" />
 		<link rel="stylesheet" href="./libs/css/styles.css" />
 	</head>
 	<body>
 		<div id="loading">
-			<div class="spinner-border" role="status">
-				
-			  </div>
+			<div class="spinner-border" role="status"></div>
 		</div>
 		<nav class="navbar">
-			<select name="countries" id="countries-dropdown">
-				<option id="countries-dropdown-value" selected disabled>
-					Select Country
-				</option>
-			</select>
+			<select
+				class="form-select form-select-sm"
+				aria-label="Default select example"
+				id="countries-dropdown"
+			></select>
 		</nav>
 
 		<!--Leaflet map-->
@@ -54,14 +46,15 @@
 			aria-hidden="true"
 		>
 			<div class="modal-dialog">
-				<div class="modal-content d-flex justify-content-center align-items-center">
+				<div
+					class="modal-content d-flex justify-content-center align-items-center"
+				>
 					<div>
 						<p>For local weather forecast, select a point on the map.</p>
 					</div>
 				</div>
 			</div>
 		</div>
-
 
 		<!--General Modal-->
 
@@ -93,14 +86,11 @@
 						</div>
 					</div>
 
-					<div id="generalContainer" class="container-fluid">
-						
-					</div>
+					<div id="generalContainer" class="container-fluid"></div>
 					<div id="currencyContainer" class="container-fluid"></div>
 				</div>
 			</div>
 		</div>
-
 
 		<div
 			class="modal fade"
@@ -131,30 +121,41 @@
 					</div>
 					<div class="modal-body">
 						<p id="noImages">Sorry no images available for this country.</p>
-						<div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel" >
-							<div class="carousel-inner">
-							  
-							  
-							  
-							</div>
-							<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
-							  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-							  <span class="visually-hidden">Previous</span>
+						<div
+							id="carouselExampleControls"
+							class="carousel slide"
+							data-bs-ride="carousel"
+						>
+							<div class="carousel-inner"></div>
+							<button
+								class="carousel-control-prev"
+								type="button"
+								data-bs-target="#carouselExampleControls"
+								data-bs-slide="prev"
+							>
+								<span
+									class="carousel-control-prev-icon"
+									aria-hidden="true"
+								></span>
+								<span class="visually-hidden">Previous</span>
 							</button>
-							<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
-							  <span class="carousel-control-next-icon" aria-hidden="true"></span>
-							  <span class="visually-hidden">Next</span>
+							<button
+								class="carousel-control-next"
+								type="button"
+								data-bs-target="#carouselExampleControls"
+								data-bs-slide="next"
+							>
+								<span
+									class="carousel-control-next-icon"
+									aria-hidden="true"
+								></span>
+								<span class="visually-hidden">Next</span>
 							</button>
-						  </div>	
+						</div>
 					</div>
-					
 				</div>
 			</div>
 		</div>
-
-		
-
-		
 
 		<!--CITIES MODAL-->
 
@@ -189,25 +190,14 @@
 		</div>
 
 		<!--SCRIPTS-->
-		<script
-			src="./vendors/js/jquery-3.6.0.min.js"
-		></script>
-		<script
-			src="./vendors/js/bootstrap.bundle.min.js"
-		></script>
-		<script
-			src="./vendors/js/leaflet.js"
-		></script>
+		<script src="./vendors/js/jquery-3.6.0.min.js"></script>
+		<script src="./vendors/js/bootstrap.bundle.min.js"></script>
+		<script src="./vendors/js/leaflet.js"></script>
 		<script src="./vendors/js/numeral.min.js"></script>
-		<script
-			src="./vendors/js/leaflet.extra-markers.min.js"
-			
-		></script>
+		<script src="./vendors/js/leaflet.extra-markers.min.js"></script>
 		<script src="./vendors/js/jquery-dateformat.min.js"></script>
 		<script src="./vendors/js/leaflet.markercluster.js"></script>
-		<script
-			src="./vendors/js/kit.fontawesome.js"
-		></script>
+		<script src="./vendors/js/kit.fontawesome.js"></script>
 		<script src="./vendors/js/easy-button.min.js"></script>
 		<script src="./libs/js/main.js" type="module"></script>
 	</body>

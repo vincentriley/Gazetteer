@@ -12,7 +12,6 @@ const lightRowColor = "#ffffff";
 const darkRowColor = "#bbc7fb49";
 var userCoordinates = null;
 
-
 //POPULATES DROPDOWN LIST
 $.ajax({
 	url: "libs/php/countryNames.php",
@@ -170,6 +169,7 @@ const showModal = () => {
 L.easyButton("fa-globe", (btn, map) => {
 	countryBordersOnMap(country);
 	countrySelection(country);
+	getNationalParks(country)
 }).addTo(map);
 
 L.easyButton("fa-newspaper", (btn, map) => {
@@ -182,7 +182,6 @@ L.easyButton("fa-virus", (btn, map) => {
 	getCovidStats(country);
 }).addTo(map);
 
-
 L.easyButton("fa-cloud-sun", (btn, map) => {
 	weatherSelected = !weatherSelected;
 	if (!weatherAlertHasFired) {
@@ -194,7 +193,7 @@ L.easyButton("fa-cloud-sun", (btn, map) => {
 	} else {
 		btn.button.style.backgroundColor = null;
 	}
-},).addTo(map);
+}).addTo(map);
 
 L.easyButton("fa-city", (btn, map) => {
 	countryBordersOnMap(country);
@@ -366,15 +365,19 @@ const getWebcams = (country) => {
 			if (result.status.name == "ok") {
 				console.log(result);
 				var webcams = result.data.result.webcams;
+				var webcamMarkers = L.markerClusterGroup();
 				webcams.forEach((webcam) => {
-					L.marker([webcam.location.latitude, webcam.location.longitude], {
-						icon: webcamMarker,
-					}).addTo(map).bindPopup(`<h5>${webcam.title}<h5>
+					webcamMarkers.addLayer(
+						L.marker([webcam.location.latitude, webcam.location.longitude], {
+							icon: webcamMarker,
+						}).bindPopup(`<h5>${webcam.title}<h5>
 						<div class="embed-responsive embed-responsive-16by9">
 						<iframe class="embed-responsive-item" src="${webcam.player.day.embed}" allowfullscreen></iframe>
 					  </div>
-									`);
+									`)
+					);
 				});
+				map.addLayer(webcamMarkers);
 			}
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
@@ -567,7 +570,7 @@ map.on("click", (e) => {
 		success: (result) => {
 			country = result.data.countryCode.toLowerCase();
 			countryFullName = result.data.countryName;
-
+			countryBordersOnMap(country);
 			$("#countries-dropdown").val(result.data.countryCode);
 			//gets weather forecast for those coordinates if weather forecast is toggled on
 			if (weatherSelected) {
@@ -920,6 +923,28 @@ const getCities = (country) => {
 				cityMarker.on("click", onClick);
 			});
 			map.addLayer(citiesMarkers);
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(errorThrown);
+		},
+	});
+};
+
+//NATIONAL PARKS API CALL
+
+const getNationalParks = (country) => {
+	if (country === "gb") {
+		country = "uk";
+	}
+	$.ajax({
+		url: "libs/php/triposoNationalParks.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			country: country,
+		},
+		success: (result) => {
+			console.log(result)
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
 			console.log(errorThrown);
