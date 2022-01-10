@@ -101,8 +101,6 @@ renderMapWithUserLocation();
 	})
 	.addTo(map); */
 
-var citiesMarkers = L.layerGroup();
-
 //MARKERS
 
 var userMarker = L.ExtraMarkers.icon({
@@ -147,6 +145,13 @@ var webcamMarker = L.ExtraMarkers.icon({
 	prefix: "fa",
 });
 
+var parkMarker = L.ExtraMarkers.icon({
+	icon: "fa-tree",
+	markerColor: "green",
+	shape: "square",
+	prefix: "fa",
+});
+
 //SHOW MODAL
 
 const showModal = () => {
@@ -167,18 +172,17 @@ const showModal = () => {
 //RENDERS EASYBUTTONS
 
 L.easyButton("fa-globe", (btn, map) => {
-	countryBordersOnMap(country);
+	//countryBordersOnMap(country);
 	countrySelection(country);
-	getNationalParks(country)
 }).addTo(map);
 
 L.easyButton("fa-newspaper", (btn, map) => {
-	countryBordersOnMap(country);
+	//countryBordersOnMap(country);
 	getCountryNews(country);
 }).addTo(map);
 
 L.easyButton("fa-virus", (btn, map) => {
-	countryBordersOnMap(country);
+	//countryBordersOnMap(country);
 	getCovidStats(country);
 }).addTo(map);
 
@@ -195,20 +199,21 @@ L.easyButton("fa-cloud-sun", (btn, map) => {
 	}
 }).addTo(map);
 
-L.easyButton("fa-city", (btn, map) => {
+/*L.easyButton("fa-city", (btn, map) => {
 	countryBordersOnMap(country);
 	getCities(country);
-}).addTo(map);
+}).addTo(map);*/
 
-L.easyButton("fa-video", (btn, map) => {
+/*L.easyButton("fa-video", (btn, map) => {
 	getWebcams(country);
-}).addTo(map);
+	getNationalParks(country)
+	getCities(country)
+	getMarkers(country)
+}).addTo(map); */
 
 L.easyButton("fa-camera", (btn, map) => {
 	getCountryImages(countryFullName);
 }).addTo(map);
-
-//HOLIDAYS API CALL
 
 //COUNTRY IMAGES API CALL
 
@@ -293,91 +298,55 @@ const getCovidStats = (country) => {
 
 				$("#generalContainer").append(
 					`
-								<div class="row generalRow" style="background-color:${darkRowColor}">
+								<div class="row generalRow covidRow" style="background-color:${darkRowColor}">
 									<div class="col-1">
 										<i class="fas fa-lungs"></i>
 									</div>
-									<div class="col-5">
+									<div class="col-6 col-md-5">
 										<p>New Cases</p>
 									</div>
-									<div class="col-3 offset-3">
+									<div class="col-5 col-md-3 offset-md-3">
 										<p>${numeral(data.timeline[0].new_confirmed).format("0,0")}</p>
 									</div>
 								</div>
 
-								<div class="row generalRow" style="background-color:${lightRowColor}">
+								<div class="row generalRow covidRow" style="background-color:${lightRowColor}">
 									<div class="col-1">
 										<i class="fas fa-skull"></i>
 									</div>
-									<div class="col-5">
+									<div class="col-6 col-md-5">
 										<p>New Deaths</p>
 									</div>
-									<div class="col-3 offset-3">
+									<div class="col-5 col-md-3 offset-md-3">
 										<p>${data.timeline[0].new_deaths}</p>
 									</div>
 								</div>
 								
-								<div class="row generalRow" style="background-color:${darkRowColor}">
+								<div class="row generalRow covidRow" style="background-color:${darkRowColor}">
 									<div class="col-1">
 										<i class="fas fa-lungs"></i>
 									</div>
-									<div class="col-5">
+									<div class="col-6 col-md-5">
 										<p>Total Cases</p>
 									</div>
-									<div class="col-3 offset-3">
+									<div class="col-5 col-md-3 offset-md-3">
 										<p>${numeral(data.latest_data.confirmed).format("0,0")}</p>
 									</div>
 								</div>
 
-								<div class="row generalRow" style="background-color:${lightRowColor}">
+								<div class="row generalRow covidRow" style="background-color:${lightRowColor}">
 									<div class="col-1">
 										<i class="fas fa-skull"></i>
 									</div>
-									<div class="col-5">
+									<div class="col-6 col-md-5">
 										<p>Total Deaths</p>
 									</div>
-									<div class="col-3 offset-3">
+									<div class="col-5 col-md-3 offset-md-3">
 										<p>${numeral(data.latest_data.deaths).format("0,0")}</p>
 									</div>
 								</div>
 								`
 				);
-			}
-		},
-		error: (jqXHR, textStatus, errorThrown) => {
-			console.log(textStatus);
-		},
-	});
-};
-
-//WEBCAM API CALL
-
-const getWebcams = (country) => {
-	map.removeLayer(citiesMarkers);
-	$.ajax({
-		url: "libs/php/windyWebcams.php",
-		type: "POST",
-		dataType: "json",
-		data: {
-			country: country.toUpperCase(),
-		},
-		success: (result) => {
-			if (result.status.name == "ok") {
-				console.log(result);
-				var webcams = result.data.result.webcams;
-				var webcamMarkers = L.markerClusterGroup();
-				webcams.forEach((webcam) => {
-					webcamMarkers.addLayer(
-						L.marker([webcam.location.latitude, webcam.location.longitude], {
-							icon: webcamMarker,
-						}).bindPopup(`<h5>${webcam.title}<h5>
-						<div class="embed-responsive embed-responsive-16by9">
-						<iframe class="embed-responsive-item" src="${webcam.player.day.embed}" allowfullscreen></iframe>
-					  </div>
-									`)
-					);
-				});
-				map.addLayer(webcamMarkers);
 			}
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
@@ -415,6 +384,7 @@ const countryBordersOnMap = (country) => {
 				});
 				map.fitBounds(countryPolygonLayer.getBounds());
 				countryPolygonLayer.addTo(map);
+				getMarkers(country);
 			}
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
@@ -570,7 +540,7 @@ map.on("click", (e) => {
 		success: (result) => {
 			country = result.data.countryCode.toLowerCase();
 			countryFullName = result.data.countryName;
-			countryBordersOnMap(country);
+			//countryBordersOnMap(country);
 			$("#countries-dropdown").val(result.data.countryCode);
 			//gets weather forecast for those coordinates if weather forecast is toggled on
 			if (weatherSelected) {
@@ -584,9 +554,6 @@ map.on("click", (e) => {
 					},
 					success: (result) => {
 						const forecast = result.data.daily;
-
-						console.log(forecast);
-
 						showModal();
 						$("#generalContainer").empty();
 						$("#generalModalLabel").empty();
@@ -784,7 +751,7 @@ const getCountryNews = (country) => {
 			console.log(result)
 			showModal();
 			$("#generalContainer").empty();
-				$("#generalModalLabel").text(`${countryFullName.toUpperCase()} HEADLINES`);
+				$("#generalModalLabel").text(`${countryFullName.toUpperCase()} NEWS`);
 				$("#flag").attr(
 					"src",
 					"http://www.geonames.org/flags/x/" + country.toLowerCase() + ".gif"
@@ -821,6 +788,116 @@ const getCountryNews = (country) => {
 	});
 };
 
+//TOP RESTAURANTS API CALL
+
+//Could condense these easily
+
+$("#citiesContainer").on("click", ".restaurants-btn", (event) => {
+	const cityId = event.target.id;
+
+	$.ajax({
+		url: "libs/php/triposoRestaurants.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			cityId: cityId,
+		},
+		success: (result) => {
+			map.removeLayer(citiesMarkers);
+			var restaurants = result.data.results;
+			$("#citiesModal").modal("hide");
+			var restaurantMarkers = L.markerClusterGroup({
+				showCoverageOnHover: false,
+			});
+			restaurants.forEach((restaurant) => {
+				restaurantMarkers.addLayer(
+					L.marker(
+						[restaurant.coordinates.latitude, restaurant.coordinates.longitude],
+						{ icon: restaurantMarker }
+					).bindPopup(`<h6>${restaurant.name}</h6><p>${restaurant.intro}</p>`)
+				);
+			});
+			map.addLayer(restaurantMarkers);
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(errorThrown);
+		},
+	});
+});
+
+//TOP HOTELS API CALL
+
+$("#citiesContainer").on("click", ".hotels-btn", (event) => {
+	const cityId = event.target.id;
+
+	$.ajax({
+		url: "libs/php/triposoHotels.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			cityId: cityId,
+		},
+		success: (result) => {
+			map.removeLayer(citiesMarkers);
+			var hotels = result.data.results;
+			$("#citiesModal").modal("hide");
+			var hotelMarkers = L.markerClusterGroup({
+				showCoverageOnHover: false,
+			});
+			hotels.forEach((hotel) => {
+				hotelMarkers.addLayer(
+					L.marker([hotel.coordinates.latitude, hotel.coordinates.longitude], {
+						icon: hotelMarker,
+					}).bindPopup(`<h6>${hotel.name}</h6><p>${hotel.intro}</p>`)
+				);
+			});
+			map.addLayer(hotelMarkers);
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(errorThrown);
+		},
+	});
+});
+
+//TOP NIGHTLIFE API CALL
+
+$("#citiesContainer").on("click", ".nightlife-btn", (event) => {
+	const cityId = event.target.id;
+
+	$.ajax({
+		url: "libs/php/triposoNightlife.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			cityId: cityId,
+		},
+		success: (result) => {
+			map.removeLayer(citiesMarkers);
+			var nightlife = result.data.results;
+			$("#citiesModal").modal("hide");
+			var nightlifeMarkers = L.markerClusterGroup({
+				showCoverageOnHover: false,
+			});
+			nightlife.forEach((nightlife) => {
+				nightlifeMarkers.addLayer(
+					L.marker(
+						[nightlife.coordinates.latitude, nightlife.coordinates.longitude],
+						{ icon: nightlifeMarker }
+					).bindPopup(`<h6>${nightlife.name}</h6><p>${nightlife.intro}</p>`)
+				);
+			});
+			map.addLayer(nightlifeMarkers);
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(errorThrown);
+		},
+	});
+});
+
+var citiesMarkers = L.markerClusterGroup({
+	showCoverageOnHover: false,
+});
+
 //GET CITIES API CALL
 
 const getCities = (country) => {
@@ -836,7 +913,7 @@ const getCities = (country) => {
 		},
 		success: (result) => {
 			var cities = result.data.results;
-			citiesMarkers.clearLayers();
+			//citiesMarkers.clearLayers();
 			$("#generalContainer").empty();
 
 			cities.forEach((city) => {
@@ -922,10 +999,46 @@ const getCities = (country) => {
 
 				cityMarker.on("click", onClick);
 			});
-			map.addLayer(citiesMarkers);
+			//map.addLayer(citiesMarkers);
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
 			console.log(errorThrown);
+		},
+	});
+};
+
+//WEBCAM API CALL
+
+const getWebcams = (country) => {
+	map.removeLayer(citiesMarkers);
+	$.ajax({
+		url: "libs/php/windyWebcams.php",
+		type: "POST",
+		dataType: "json",
+		data: {
+			country: country.toUpperCase(),
+		},
+		success: (result) => {
+			if (result.status.name == "ok") {
+				console.log(result);
+				var webcams = result.data.result.webcams;
+				//var webcamMarkers = L.markerClusterGroup();
+				webcams.forEach((webcam) => {
+					citiesMarkers.addLayer(
+						L.marker([webcam.location.latitude, webcam.location.longitude], {
+							icon: webcamMarker,
+						}).bindPopup(`<h5>${webcam.title}<h5>
+						<div class="embed-responsive embed-responsive-16by9">
+						<iframe class="embed-responsive-item" src="${webcam.player.day.embed}" allowfullscreen></iframe>
+					  </div>
+									`)
+					);
+				});
+				//map.addLayer(webcamMarkers);
+			}
+		},
+		error: (jqXHR, textStatus, errorThrown) => {
+			console.log(textStatus);
 		},
 	});
 };
@@ -944,7 +1057,18 @@ const getNationalParks = (country) => {
 			country: country,
 		},
 		success: (result) => {
-			console.log(result)
+			if (result.status.name == "ok") {
+				const parks = result.data.results;
+				//var parkMarkers = L.markerClusterGroup();
+				parks.forEach((park) => {
+					citiesMarkers.addLayer(
+						L.marker([park.coordinates.latitude, park.coordinates.longitude], {
+							icon: parkMarker,
+						}).bindPopup(`<h6>${park.name}</h6><p>${park.snippet}</p>`)
+					);
+				});
+				//map.addLayer(parkMarkers)
+			}
 		},
 		error: (jqXHR, textStatus, errorThrown) => {
 			console.log(errorThrown);
@@ -952,105 +1076,14 @@ const getNationalParks = (country) => {
 	});
 };
 
-//TOP RESTAURANTS API CALL
-
-//Could condense these easily
-
-$("#citiesContainer").on("click", ".restaurants-btn", (event) => {
-	const cityId = event.target.id;
-
-	$.ajax({
-		url: "libs/php/triposoRestaurants.php",
-		type: "POST",
-		dataType: "json",
-		data: {
-			cityId: cityId,
-		},
-		success: (result) => {
-			map.removeLayer(citiesMarkers);
-			var restaurants = result.data.results;
-			$("#citiesModal").modal("hide");
-			var restaurantMarkers = L.markerClusterGroup();
-			restaurants.forEach((restaurant) => {
-				restaurantMarkers.addLayer(
-					L.marker(
-						[restaurant.coordinates.latitude, restaurant.coordinates.longitude],
-						{ icon: restaurantMarker }
-					).bindPopup(`<h6>${restaurant.name}</h6><p>${restaurant.intro}</p>`)
-				);
-			});
-			map.addLayer(restaurantMarkers);
-		},
-		error: (jqXHR, textStatus, errorThrown) => {
-			console.log(errorThrown);
-		},
-	});
-});
-
-//TOP HOTELS API CALL
-
-$("#citiesContainer").on("click", ".hotels-btn", (event) => {
-	const cityId = event.target.id;
-
-	$.ajax({
-		url: "libs/php/triposoHotels.php",
-		type: "POST",
-		dataType: "json",
-		data: {
-			cityId: cityId,
-		},
-		success: (result) => {
-			map.removeLayer(citiesMarkers);
-			var hotels = result.data.results;
-			$("#citiesModal").modal("hide");
-			var hotelMarkers = L.markerClusterGroup();
-			hotels.forEach((hotel) => {
-				hotelMarkers.addLayer(
-					L.marker([hotel.coordinates.latitude, hotel.coordinates.longitude], {
-						icon: hotelMarker,
-					}).bindPopup(`<h6>${hotel.name}</h6><p>${hotel.intro}</p>`)
-				);
-			});
-			map.addLayer(hotelMarkers);
-		},
-		error: (jqXHR, textStatus, errorThrown) => {
-			console.log(errorThrown);
-		},
-	});
-});
-
-//TOP NIGHTLIFE API CALL
-
-$("#citiesContainer").on("click", ".nightlife-btn", (event) => {
-	const cityId = event.target.id;
-
-	$.ajax({
-		url: "libs/php/triposoNightlife.php",
-		type: "POST",
-		dataType: "json",
-		data: {
-			cityId: cityId,
-		},
-		success: (result) => {
-			map.removeLayer(citiesMarkers);
-			var nightlife = result.data.results;
-			$("#citiesModal").modal("hide");
-			var nightlifeMarkers = L.markerClusterGroup();
-			nightlife.forEach((nightlife) => {
-				nightlifeMarkers.addLayer(
-					L.marker(
-						[nightlife.coordinates.latitude, nightlife.coordinates.longitude],
-						{ icon: nightlifeMarker }
-					).bindPopup(`<h6>${nightlife.name}</h6><p>${nightlife.intro}</p>`)
-				);
-			});
-			map.addLayer(nightlifeMarkers);
-		},
-		error: (jqXHR, textStatus, errorThrown) => {
-			console.log(errorThrown);
-		},
-	});
-});
+const getMarkers = (country) => {
+	citiesMarkers.clearLayers();
+	$.when(
+		getCities(country),
+		getWebcams(country),
+		getNationalParks(country)
+	).done(map.addLayer(citiesMarkers));
+};
 
 $("#countries-dropdown").on("change", () => {
 	country = $("#countries-dropdown").val();

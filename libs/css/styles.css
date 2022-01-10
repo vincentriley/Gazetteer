@@ -16,15 +16,36 @@ body {
 	margin-left: 6%;
 	margin-top: 20px;
 	position: absolute;
-	width:auto;
+	width: auto;
 }
 
 .navbar {
 	margin-top: 10px;
 }
 
-#weatherAlertModal {
+.weatherAlertModal {
 	top: 40vh;
+}
+
+@media screen and (max-width: 400px) {
+	#generalModalLabel {
+		font-size: 0.9rem;
+	}
+
+	#imagesModalLabel {
+		font-size: 0.9rem;
+	}
+	 p {
+		 font-size: 0.8rem;
+	 }
+
+	
+}
+
+@media screen and (max-width: 576px) {
+	#imagesModalLabel {
+		font-size: 0.9rem;
+	}
 }
 
 @media screen and (max-width: 767px) {
@@ -112,7 +133,6 @@ body {
 }
 
 .btn-primary {
-	
 	color: white;
 }
 
@@ -131,24 +151,20 @@ body {
 
 .weatherDate {
 	height: 1em !important;
-	
 }
-
 
 .mainWeatherRow {
 	padding: 10px;
 }
 
-
 #loading {
-  position: absolute;
-  width: 100vw;
-  height: 100vh;
-  z-index: 15;
-  top: 50%;
-  left: 50%;
-  margin: -100px 0 0 -150px;
-  
+	position: absolute;
+	width: 100vw;
+	height: 100vh;
+	z-index: 15;
+	top: 50%;
+	left: 50%;
+	margin: -100px 0 0 -150px;
 }
 
 #weatherAlertModal p {
